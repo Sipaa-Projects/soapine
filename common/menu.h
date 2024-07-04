@@ -9,6 +9,8 @@ bool reboot_to_fw_ui_supported(void);
 noreturn void reboot_to_fw_ui(void);
 #endif
 
+void menu_init_term();
+
 noreturn void menu(bool first_run);
 
 noreturn void boot(char *config);

@@ -1,14 +1,14 @@
-# Limine configuration file
+# Soapine configuration file
 
 ## Location of the config file
 
-Limine scans for a config file on *the boot drive*. Every partition on the boot drive
+Soapine scans for a config file on *the boot drive*. Every partition on the boot drive
 is scanned sequentially - first partition first (or, on UEFI, the partition containing the
-EFI executable of the booted Limine is scanned first), last partition last - for the presence
+EFI executable of the booted Soapine is scanned first), last partition last - for the presence
 of either a `/limine.cfg`, `/limine/limine.cfg`, `/boot/limine.cfg`, `/boot/limine/limine.cfg`,
 or a `/EFI/BOOT/limine.cfg` file, in that order.
 
-Once the file is located, Limine will use it as its config file. Other possible
+Once the file is located, Soapine will use it as its config file. Other possible
 candidates in subsequent partitions or directories are ignored.
 
 It is thus imperative that the intended config file is placed in a location that will
@@ -16,7 +16,7 @@ not be shadowed by another candidate config file.
 
 ## Structure of the config file
 
-The Limine configuration file is comprised of *assignments* and *entries*.
+The Soapine configuration file is comprised of *assignments* and *entries*.
 Comments begin in '#' and can only be on their own lines.
 
 ### Entries and sub-entries
@@ -59,31 +59,32 @@ Miscellaneous:
 * `TIMEOUT` - Specifies the timeout in seconds before the first *entry* is automatically booted. If set to `no`, disable automatic boot. If set to `0`, boots default entry instantly (see `DEFAULT_ENTRY` key).
 * `QUIET` - If set to `yes`, enable quiet mode, where all screen output except panics and important warnings is suppressed. If `TIMEOUT` is not 0, the `TIMEOUT` still occurs, and pressing any key during the timeout will reveal the menu and disable quiet mode.
 * `SERIAL` - If set to `yes`, enable serial I/O for the bootloader.
-* `SERIAL_BAUDRATE` - If `SERIAL` is set to `yes`, this specifies the baudrate to use for serial I/O. Defaults to `9600`. BIOS only, ignored with Limine UEFI.
+* `SERIAL_BAUDRATE` - If `SERIAL` is set to `yes`, this specifies the baudrate to use for serial I/O. Defaults to `9600`. BIOS only, ignored with Soapine UEFI.
 * `DEFAULT_ENTRY` - 1-based entry index of the entry which will be automatically selected at startup. If unspecified, it is `1`.
 * `REMEMBER_LAST_ENTRY` - If set to `yes`, remember last booted entry. (UEFI only)
-* `GRAPHICS` - If set to `no`, force CGA text mode for the boot menu, else use a video mode. Ignored with Limine UEFI.
+* `GRAPHICS` - If set to `no`, force CGA text mode for the boot menu, else use a video mode. Ignored with Soapine UEFI.
 * `VERBOSE` - If set to `yes`, print additional information during boot. Defaults to not verbose.
-* `RANDOMISE_MEMORY` - If set to `yes`, randomise the contents of RAM at bootup in order to find bugs related to non zeroed memory or for security reasons. This option will slow down boot time significantly. For the BIOS port of Limine, this will only randomise memory below 4GiB.
+* `RANDOMISE_MEMORY` - If set to `yes`, randomise the contents of RAM at bootup in order to find bugs related to non zeroed memory or for security reasons. This option will slow down boot time significantly. For the BIOS port of Soapine, this will only randomise memory below 4GiB.
 * `RANDOMIZE_MEMORY` - Alias of `RANDOMISE_MEMORY`.
 * `HASH_MISMATCH_PANIC` - If set to `no`, do not panic if there is a hash mismatch for a file, but print a warning instead.
 
-Limine interface control options:
+Soapine interface control options:
 
-* `INTERFACE_RESOLUTION` - Specify screen resolution to be used by the Limine interface (menu, editor, console...) in the form `<width>x<height>`. This will *only* affect the Limine interface, not any booted OS. If not specified, Limine will pick a resolution automatically. If the resolution is not available, Limine will pick another one automatically. Ignored if using text mode.
-* `INTERFACE_BRANDING` - A string that will be displayed on top of the Limine interface.
+* `INTERFACE_USE_NEW_MENU` - If set to anything else than `no`, Soapine will use the new menu implementation.
+* `INTERFACE_RESOLUTION` - Specify screen resolution to be used by the Soapine interface (menu, editor, console...) in the form `<width>x<height>`. This will *only* affect the Soapine interface, not any booted OS. If not specified, Soapine will pick a resolution automatically. If the resolution is not available, Soapine will pick another one automatically. Ignored if using text mode.
+* `INTERFACE_BRANDING` - A string that will be displayed on top of the Soapine interface.
 * `INTERFACE_BRANDING_COLOUR` - A value between 0 and 7 specifying the colour of the branding string. Default is cyan (6).
 * `INTERFACE_BRANDING_COLOR` - Alias of `INTERFACE_BRANDING_COLOUR`.
 * `INTERFACE_HELP_HIDDEN` - Hides the help text located at the top of the screen showing the key bindings.
 
-Limine graphical terminal control options:
+Soapine graphical terminal control options:
 
 These are ignored if using text mode.
 
 * `TERM_FONT` - URI path to a font file to be used instead of the default one for the menu and terminal. The font file must be a code page 437 character set comprised of 256 consecutive glyph bitmaps. Each glyph's bitmap must be expressed left to right (1 byte per row), and top to bottom (16 bytes per whole glyph by default; see `TERM_FONT_SIZE`). See e.g. the [VGA text mode font collection](https://github.com/viler-int10h/vga-text-mode-fonts) for fonts.
 * `TERM_FONT_SIZE` - The size of the font in dots, which must correspond to the font file or the display will be garbled. Note that glyphs are always one byte wide, and columns over 8 are empty. Many fonts may be used in both 8- and 9-dot wide variants. Defaults to `8x16`. Ignored if `TERM_FONT` not set or if the font fails to load.
 * `TERM_FONT_SCALE` - Scaling for the font in the x and y directions. `2x2` would display the font in double size, which is useful on high-DPI displays at native resolution. `2x1` only makes the font twice as wide, similar to the VGA 40 column mode. `4x2` might be good for a narrow font on a high resolution display. Values over 8 are disallowed. Default is no scaling, i.e. `1x1`.
-* `TERM_FONT_SPACING` - Horizontal spacing, in pixels, between glyphs on screen. It is equivalent to setting a font width of `<specified width>+<this value>`, except this value is preserved even in case font loading fails, and it also applies to the built-in Limine font. Defaults to 1. 0 is allowed.
+* `TERM_FONT_SPACING` - Horizontal spacing, in pixels, between glyphs on screen. It is equivalent to setting a font width of `<specified width>+<this value>`, except this value is preserved even in case font loading fails, and it also applies to the built-in Soapine font. Defaults to 1. 0 is allowed.
 * `TERM_PALETTE` - Specifies the colour palette used by the terminal (RRGGBB). It is a `;` separated array of 8 colours: black, red, green, brown, blue, magenta, cyan, and gray. Ignored if not using a graphical terminal.
 * `TERM_PALETTE_BRIGHT` - Specifies the bright colour palette used by the terminal (RRGGBB). It is a `;` separated array of 8 bright colours: dark gray, bright red, bright green, yellow, bright blue, bright magenta, bright cyan, and white. Ignored if not using a graphical terminal.
 * `TERM_BACKGROUND` - Terminal text background colour (TTRRGGBB). TT stands for transparency.
@@ -105,7 +106,7 @@ Editor control options:
 *Locally assignable (non protocol specific)* keys are:
 
 * `COMMENT` - An optional comment string that will be displayed by the bootloader on the menu when an entry is selected.
-* `PROTOCOL` - The boot protocol that will be used to boot the kernel. Valid protocols are: `linux`, `limine`, `multiboot` (or `multiboot1`), `multiboot2`, `efi_chainload`, `bios_chainload`, and `chainload_next`.
+* `PROTOCOL` - The boot protocol that will be used to boot the kernel. Valid protocols are: `linux`, `Soapine`, `multiboot` (or `multiboot1`), `multiboot2`, `efi_chainload`, `bios_chainload`, and `chainload_next`.
 * `CMDLINE` - The command line string to be passed to the kernel/executable. Can be omitted.
 * `KERNEL_CMDLINE` - Alias of `CMDLINE`.
 
@@ -114,14 +115,14 @@ Editor control options:
 * Linux protocol:
   * `KERNEL_PATH` - The URI path of the kernel.
   * `MODULE_PATH` - The URI path to a module (such as initramfs). This key can be assigned multiple times to specify multiple modules.
-  * `RESOLUTION` - The resolution to be used. This setting takes the form of `<width>x<height>x<bpp>`. If the resolution is not available, Limine will pick another one automatically. Omitting `<bpp>` will default to 32.
+  * `RESOLUTION` - The resolution to be used. This setting takes the form of `<width>x<height>x<bpp>`. If the resolution is not available, Soapine will pick another one automatically. Omitting `<bpp>` will default to 32.
   * `TEXTMODE` - If set to `yes`, prefer text mode. (BIOS only)
 
-* Limine protocol:
+* Soapine protocol:
   * `KERNEL_PATH` - The URI path of the kernel.
   * `MODULE_PATH` - The URI path to a module. This key can be assigned multiple times to specify multiple modules.
   * `MODULE_CMDLINE` - A command line to be passed to a module. This key can also be specified multiple times. It applies to the module described by the last module key assigned.
-  * `RESOLUTION` - The resolution to be used. This setting takes the form of `<width>x<height>x<bpp>`. If the resolution is not available, Limine will pick another one automatically. Omitting `<bpp>` will default to 32.
+  * `RESOLUTION` - The resolution to be used. This setting takes the form of `<width>x<height>x<bpp>`. If the resolution is not available, Soapine will pick another one automatically. Omitting `<bpp>` will default to 32.
   * `KASLR` - For relocatable kernels, if set to `no`, disable kernel address space layout randomisation. KASLR is enabled by default.
   * `MAX_PAGING_MODE` - Limit the maximum paging mode to one of the following:
     - x86-64 and aarch64: `4level`, `5level`.
@@ -131,12 +132,12 @@ Editor control options:
   * `KERNEL_PATH` - The URI path of the kernel.
   * `MODULE_PATH` - The URI path to a module. This key can be assigned multiple times to specify multiple modules.
   * `MODULE_STRING` - A string to be passed to a module. This key can also be specified multiple times. It applies to the module described by the last module key assigned.
-  * `RESOLUTION` - The resolution to be used should the kernel request a graphical framebuffer. This setting takes the form of `<width>x<height>x<bpp>` and *overrides* any resolution requested by the kernel. If the resolution is not available, Limine will pick another one automatically. Omitting `<bpp>` will default to 32.
+  * `RESOLUTION` - The resolution to be used should the kernel request a graphical framebuffer. This setting takes the form of `<width>x<height>x<bpp>` and *overrides* any resolution requested by the kernel. If the resolution is not available, Soapine will pick another one automatically. Omitting `<bpp>` will default to 32.
   * `TEXTMODE` - If set to `yes`, prefer text mode. (BIOS only)
 
 * EFI Chainload protocol:
   * `IMAGE_PATH` - URI of the EFI application to chainload.
-  * `RESOLUTION` - The resolution to be used. This setting takes the form of `<width>x<height>x<bpp>`. If the resolution is not available, Limine will pick another one automatically. Omitting `<bpp>` will default to 32.
+  * `RESOLUTION` - The resolution to be used. This setting takes the form of `<width>x<height>x<bpp>`. If the resolution is not available, Soapine will pick another one automatically. Omitting `<bpp>` will default to 32.
 
 * BIOS Chainload protocol:
   * `DRIVE` - The 1-based drive to chainload, if omitted, assume boot drive.
@@ -145,11 +146,11 @@ Editor control options:
   * `GPT_UUID` or `GPT_GUID` - Optional. If passed, use the GPT GUID to identify the drive containing the volume to chainload. Overrides `DRIVE` and `MBR_ID`, if present, but does *not* override `PARTITION`.
 
 * chainload_next protocol:
-  * `RESOLUTION` - For UEFI, the resolution to be used. This setting takes the form of `<width>x<height>x<bpp>`. If the resolution is not available, Limine will pick another one automatically. Omitting `<bpp>` will default to 32.
+  * `RESOLUTION` - For UEFI, the resolution to be used. This setting takes the form of `<width>x<height>x<bpp>`. If the resolution is not available, Soapine will pick another one automatically. Omitting `<bpp>` will default to 32.
 
 ## URIs
 
-A URI is a path that Limine uses to locate resources in the whole system. It is
+A URI is a path that Soapine uses to locate resources in the whole system. It is
 comprised of a *resource*, a *root*, and a *path*. It takes the form of:
 ```
 resource://root/path
@@ -164,7 +165,7 @@ A resource can be one of the following:
 * `guid` - The `root` takes the form of a GUID/UUID, such as `guid://736b5698-5ae1-4dff-be2c-ef8f44a61c52/...`. The GUID is that of either a filesystem, when available, or a GPT partition GUID, when using GPT, in a unified namespace.
 * `uuid` - Alias of `guid`.
 * `fslabel` - The `root` is the name of the filesystem label of a partition.
-* `tftp` - The `root` is the IP address of the tftp server to load the file from. If the root is left empty (`tftp:///...`) the file will be loaded from the server Limine booted from. This resource is only available when booting off PXE.
+* `tftp` - The `root` is the IP address of the tftp server to load the file from. If the root is left empty (`tftp:///...`) the file will be loaded from the server Soapine booted from. This resource is only available when booting off PXE.
 
 A URI can optionally be suffixed with a blake2b hash for the referenced file,
 by appending a pound character (`#`) followed by the blake2b hash.
@@ -191,6 +192,6 @@ Macros must always be placed inside `${...}` where `...` is the arbitrary macro 
 
 ### Built-in macros
 
-Limine automatically defines these macros:
+Soapine automatically defines these macros:
 
 * `ARCH` - This built-in macro expands to the architecture of the machine. Possible values are: `x86-64`, `ia-32`, `aarch64`, `riscv64`. In the case of IA-32, BIOS or UEFI, the macro will always expand to `x86-64` if the 64-bit extensions are available, else `ia-32`.

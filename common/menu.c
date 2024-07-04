@@ -243,11 +243,19 @@ struct menu_entry *print_menu_entries(struct menu_entry *tree_main, int sub_coun
     return sme;
 }
 
+extern void _old_menu(bool first_run);
+
 noreturn void _menu(bool first_run)
 {
     menu_init_memmap();
     menu_init_disks();
     menu_init_term();
+
+    char *use_new_menu = config_get_value(NULL, 0, "INTERFACE_USE_NEW_MENU");
+    if (use_new_menu == NULL || strcmp(use_new_menu, "no") != 0)
+    {
+        _old_menu(first_run);
+    }
 
     char *menu_branding = menu_get_branding();
 
@@ -323,6 +331,7 @@ refresh:
                 }
             }
 
+    panic(true, "Unsupported protocol specified.");
             boot(selected_menu_entry->body);
 
         default:

@@ -38,7 +38,6 @@ EFI_GUID limine_efi_vendor_guid =
 
 static char *menu_branding = NULL;
 static char *menu_branding_colour = NULL;
-no_unwind bool booting_from_editor = false;
 static no_unwind char saved_orig_entry[EDITOR_MAX_BUFFER_SIZE];
 static no_unwind char saved_title[64];
 
@@ -609,7 +608,7 @@ extern symbol bss_end;
 
 #if defined(UEFI)
 bool reboot_to_fw_ui_supported(void) {
-    uint64_t os_indications_supported;nope
+    uint64_t os_indications_supported;
     UINTN size = sizeof(os_indications_supported);
     EFI_GUID global_variable = EFI_GLOBAL_VARIABLE;
     EFI_STATUS status = gRT->GetVariable(L"OsIndicationsSupported", &global_variable, NULL, &size, &os_indications_supported);
@@ -651,57 +650,7 @@ not_found:;
 }
 #endif
 
-noreturn void _menu(bool first_run) {
-    size_t data_size = (uintptr_t)data_end - (uintptr_t)data_begin;
-#if defined (BIOS)
-    size_t s2_data_size = (uintptr_t)s2_data_end - (uintptr_t)s2_data_begin;
-    size_t bss_size = (uintptr_t)bss_end - (uintptr_t)bss_begin;
-#endif
-
-    if (rewound_memmap != NULL) {
-        memcpy(data_begin, rewound_data, data_size);
-#if defined (BIOS)
-        memcpy(s2_data_begin, rewound_s2_data, s2_data_size);
-        memcpy(bss_begin, rewound_bss, bss_size);
-#endif
-        memcpy(memmap, rewound_memmap, rewound_memmap_entries * sizeof(struct memmap_entry));
-        memmap_entries = rewound_memmap_entries;
-    } else {
-        rewound_data = ext_mem_alloc(data_size);
-#if defined (BIOS)
-        rewound_s2_data = ext_mem_alloc(s2_data_size);
-        rewound_bss = ext_mem_alloc(bss_size);
-#endif
-        rewound_memmap = ext_mem_alloc(MEMMAP_MAX * sizeof(struct memmap_entry));
-        if (memmap_entries > MEMMAP_MAX) {
-            panic(false, "menu: Too many memmap entries");
-        }
-        memcpy(rewound_memmap, memmap, memmap_entries * sizeof(struct memmap_entry));
-        rewound_memmap_entries = memmap_entries;
-        memcpy(rewound_data, data_begin, data_size);
-#if defined (BIOS)
-        memcpy(rewound_s2_data, s2_data_begin, s2_data_size);
-        memcpy(rewound_bss, bss_begin, bss_size);
-#endif
-    }
-
-    term_fallback();
-
-    if (bad_config == false) {
-#if defined (UEFI)
-        if (init_config_disk(boot_volume)) {
-#endif
-        volume_iterate_parts(boot_volume,
-            if (!init_config_disk(_PART)) {
-                boot_volume = _PART;
-                break;
-            }
-        );
-#if defined (UEFI)
-        }
-#endif
-    }
-
+noreturn void _old_menu(bool first_run) {
     char *quiet_str = config_get_value(NULL, 0, "QUIET");
     quiet = quiet_str != NULL && strcmp(quiet_str, "yes") == 0;
 
@@ -790,7 +739,7 @@ noreturn void _menu(bool first_run) {
     if (remember_last != NULL && strcasecmp(remember_last, "yes") == 0) {
         UINTN getvar_size = sizeof(size_t);
         size_t last;
-        if (gRT->GetVariable(L"LimineLastBootedEntry",
+        if (gRT->GetVariable(L"SoapineLastBootedEntry",
                              &limine_efi_vendor_guid,
                              NULL,
                              &getvar_size,
@@ -1007,7 +956,7 @@ timeout_aborted:
                 }
 
 #if defined (UEFI)
-                gRT->SetVariable(L"LimineLastBootedEntry",
+                gRT->SetVariable(L"SoapineLastBootedEntry",
                                  &limine_efi_vendor_guid,
                                  EFI_VARIABLE_NON_VOLATILE | EFI_VARIABLE_BOOTSERVICE_ACCESS | EFI_VARIABLE_RUNTIME_ACCESS,
                                  sizeof(size_t),
@@ -1054,49 +1003,4 @@ timeout_aborted:
             }
         }
     }
-}
-
-noreturn void boot(char *config) {
-    char *cmdline = config_get_value(config, 0, "KERNEL_CMDLINE");
-    if (!cmdline) {
-        cmdline = config_get_value(config, 0, "CMDLINE");
-    }
-    if (!cmdline) {
-        cmdline = "";
-    }
-
-    char *proto = config_get_value(config, 0, "PROTOCOL");
-    if (proto == NULL) {
-        panic(true, "Boot protocol not specified for this entry");
-    }
-
-    if (!strcmp(proto, "limine")) {
-        limine_load(config, cmdline);
-    } else if (!strcmp(proto, "linux")) {
-        linux_load(config, cmdline);
-    } else if (!strcmp(proto, "multiboot1") || !strcmp(proto, "multiboot")) {
-#if defined (__x86_64__) || defined (__i386__)
-        multiboot1_load(config, cmdline);
-#else
-        quiet = false;
-        print("Multiboot 1 is not available on non-x86 architectures.\n\n");
-#endif
-    } else if (!strcmp(proto, "multiboot2")) {
-#if defined (__x86_64__) || defined (__i386__)
-        multiboot2_load(config, cmdline);
-#else
-        quiet = false;
-        print("Multiboot 2 is not available on non-x86 architectures.\n\n");
-#endif
-    } else if (!strcmp(proto, "chainload_next")) {
-        chainload_next(config, cmdline);
-#if defined (BIOS)
-    } else if (!strcmp(proto, "bios_chainload")) {
-#elif defined (UEFI)
-    } else if (!strcmp(proto, "efi_chainload")) {
-#endif
-        chainload(config, cmdline);
-    }
-
-    panic(true, "Unsupported protocol specified.");
 }
