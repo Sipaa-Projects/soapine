@@ -1,0 +1,116 @@
+#! /bin/sh
+
+set -ex
+
+srcdir="$(dirname "$0")"
+test -z "$srcdir" && srcdir=.
+
+: "${AUTORECONF:=autoreconf}"
+: "${AUTOMAKE:=automake}"
+
+cd "$srcdir"
+
+FREESTANDING_TOOLCHAIN_COMMIT_HASH=18a5e52483344e117d45738c9afb2b34792cbced
+FREESTANDING_HEADERS_COMMIT_HASH=dd3abd2d7147efc4170dff478d3b7730bed14147
+CC_RUNTIME_COMMIT_HASH=aa5854cebb4a5a561f35252cdda741919fc9c3f6
+LIMINE_EFI_COMMIT_HASH=d8257094947b0edefe9fa4dcb15255235e3c5193
+TINF_COMMIT_HASH=57ffa1f1d5e3dde19011b2127bd26d01689b694b
+FLANTERM_COMMIT_HASH=ef07a10cc38b34aa003d17be97a9f3542e275069
+STB_COMMIT_HASH=013ac3beddff3dbffafd5177e7972067cd2b5083
+DTC_COMMIT_HASH=039a99414e778332d8f9c04cbd3072e1dcc62798
+
+AUXFILES="config.guess config.sub install-sh"
+
+clone_repo_commit() {
+    if [ -d $2/.git ]; then
+        git -C $2 reset --hard
+        git -C $2 clean -fd
+        if ! git -C $2 checkout $3; then
+            rm -rf $2
+        fi
+    else
+        if [ -d $2 ]; then
+            echo "error: '$2' is not a Git repository"
+            exit 1
+        fi
+    fi
+    if ! [ -d $2 ]; then
+        git clone $1 $2
+        git -C $2 checkout $3
+    fi
+}
+
+if ! [ -f version ]; then
+    clone_repo_commit https://github.com/osdev0/freestanding-toolchain.git build-aux/freestanding-toolchain $FREESTANDING_TOOLCHAIN_COMMIT_HASH
+    clone_repo_commit https://github.com/osdev0/freestanding-headers.git freestanding-headers $FREESTANDING_HEADERS_COMMIT_HASH
+
+    clone_repo_commit https://github.com/osdev0/cc-runtime.git decompressor/cc-runtime $CC_RUNTIME_COMMIT_HASH
+    rm -rf common/cc-runtime
+    cp -rp decompressor/cc-runtime common/
+    for f in common/cc-runtime/*.c; do
+        mv "$f" "$(echo "$f" | sed 's/\.c/.s2.c/g')"
+    done
+
+    clone_repo_commit https://github.com/limine-bootloader/limine-efi.git limine-efi $LIMINE_EFI_COMMIT_HASH
+
+    clone_repo_commit https://github.com/jibsen/tinf.git tinf $TINF_COMMIT_HASH
+    mkdir -p decompressor/tinf
+    cp tinf/src/tinf.h tinf/src/tinflate.c tinf/src/tinfgzip.c decompressor/tinf/
+    patch -p0 < decompressor/tinf.patch
+    rm -f tinf/src/tinf.h.orig tinf/src/tinflate.c.orig tinf/src/tinfgzip.c.orig
+
+    clone_repo_commit https://github.com/mintsuki/flanterm.git common/flanterm $FLANTERM_COMMIT_HASH
+
+    clone_repo_commit https://github.com/nothings/stb.git stb $STB_COMMIT_HASH
+    cp stb/stb_image.h common/lib/
+    patch -p0 < common/stb_image.patch
+    rm -f common/lib/stb_image.h.orig
+
+    clone_repo_commit https://git.kernel.org/pub/scm/utils/dtc/dtc.git dtc $DTC_COMMIT_HASH
+    rm -rf common/libfdt
+    cp -rp dtc/libfdt common/
+    find common/libfdt/ -type f -not -name '*.c' -not -name '*.h' -delete
+    patch -p1 < common/libfdt.patch
+    rm -f common/libfdt/*.orig
+fi
+
+# Create timestamps file
+if git log -1 >/dev/null 2>&1; then
+    cat >timestamps <<EOF
+REGEN_DATE="$(git log -1 --pretty=%cd --date='format:%B %Y')"
+SOURCE_DATE_EPOCH="$(git log -1 --pretty=%ct)"
+SOURCE_DATE_EPOCH_TOUCH="$(git log -1 --pretty=%cI | head -c 16 | sed 's/-//g;s/T//g;s/://g')"
+EOF
+fi
+
+if ! test -f timestamps; then
+    echo "error: Not a Git repository and 'timestamps' file missing."
+    exit 1
+fi
+
+for auxfile in $AUXFILES; do
+    rm -f build-aux/$auxfile
+done
+
+$AUTORECONF -fvi -Wall
+
+# Older versions of autoreconf have a bug where they do not
+# install auxiliary files, sometimes... Check if that is the
+# case and work around...
+for auxfile in $AUXFILES; do
+    if ! [ -f build-aux/$auxfile ]; then
+        if ! $AUTOMAKE --print-libdir >/dev/null 2>&1; then
+            echo "error: Broken autoreconf detected, but missing or broken automake."
+            echo "       Please make sure automake is installed and working."
+            exit 1
+        fi
+        AUTOMAKE_LIBDIR="$($AUTOMAKE --print-libdir)"
+        if [ -z "$AUTOMAKE_LIBDIR" ]; then
+            # Assume `true` was passed as $AUTOMAKE
+            continue
+        fi
+        mkdir -p build-aux
+        cp -v "$AUTOMAKE_LIBDIR/$auxfile" build-aux/
+        chmod +x build-aux/$auxfile
+    fi
+done
