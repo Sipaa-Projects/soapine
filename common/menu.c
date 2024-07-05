@@ -185,10 +185,8 @@ char *menu_get_branding()
 
 int get_entry_count(struct menu_entry *tree_main)
 {
-    // works kinda like strlen
-
     int menu_entry_count = 0;
-    struct menu_entry *curentry = menu_tree;
+    struct menu_entry *curentry = tree_main;
     while (curentry != NULL)
     {
         menu_entry_count++;
@@ -223,7 +221,7 @@ struct menu_entry *print_menu_entries(struct menu_entry *tree_main, int sub_coun
 
             if (sub_count > 0)
             {
-                for (int i = 0; i < sub_count; i++)
+                for (int unused = 0; i < sub_count; i++)
                     print("-");
 
                 print(" ");
@@ -306,7 +304,7 @@ refresh:
             goto refresh;
 
         case GETCHAR_CURSOR_DOWN:
-            if (selected_entry == max_entries - 1)
+            if ((int)selected_entry == max_entries - 1)
             {
                 selected_entry = 0;
                 goto refresh;
