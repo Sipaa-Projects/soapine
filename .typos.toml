@@ -18,5 +18,6 @@ GUID = "GUID"
 pn = "pn"
 hd = "hd"
 htpt = "htpt"
+sme = "sme"
 
 [default.extend-identifiers]
