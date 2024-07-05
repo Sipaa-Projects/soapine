@@ -1,6 +1,6 @@
 #pragma once
 
-#include <stdint.h>
+#include <efi.h>
 #include <stdbool.h>
 
 typedef struct framebuffer

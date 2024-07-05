@@ -8,10 +8,12 @@
 
 terminal_type_t term_type;
 
+void dummy() {}
+
 void term_write(char *str)
 {
     if (term_type == FALLBACK)
-        AsciiPrint(str); // UEFI uses Unicode characters.
+        dummy(); //AsciiPrint(str); // UEFI uses Unicode characters.
     else if (term_type == FBTERM)
         for (int i = 0; i < strlen(str); i++)
             st_write(str[i]);
@@ -23,7 +25,7 @@ void term_init(terminal_type_t preferred)
     {
     case FBTERM:
         if (!fb_init(-1, -1, -1)) { // Let the firmware automatically choose a mode for us.
-            Print(L"lib/term: fb_init fail. Using fallback.\n");
+            //Print(L"lib/term: fb_init fail. Using fallback.\n");
             term_init(FALLBACK); // Use a fallback terminal if it fails.
             return;
         }

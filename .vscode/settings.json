@@ -1,5 +1,10 @@
 {
     "files.associations": {
-        "term.h": "c"
+        "term.h": "c",
+        "stdbool.h": "c",
+        "efi.h": "c",
+        "compare": "c",
+        "cstdint": "c",
+        "format": "c"
     }
 }

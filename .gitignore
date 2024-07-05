@@ -2,3 +2,4 @@ gnu-efi/
 ovmf/
 bin/
 obj/
+aurix-efi/

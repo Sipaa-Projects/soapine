@@ -3,13 +3,12 @@
 
 #include <lib/term.h>
 
-//EFI_STATUS EFIAPI efi_main (EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE *SystemTable)
-EFI_STATUS EFIAPI _start (EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE *SystemTable)
+EFI_STATUS EFIAPI efi_main (EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE *SystemTable)
 {
-    //InitializeLib(ImageHandle, SystemTable);
-    //term_init(FBTERM);
+    InitializeLib(ImageHandle, SystemTable);
+    term_init(FBTERM);
 
-    //term_write("Hello World! Café (to test accents)\n");
+    term_write("Hello World! Café (to test accents)\n");
 
     while (1) ;;
     return EFI_SUCCESS;
