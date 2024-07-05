@@ -24,5 +24,6 @@
 #endif
 
 int getchar(void);
+void readline(const char *orig_str, char *buf, size_t limit);
 
 #endif

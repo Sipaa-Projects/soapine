@@ -2,6 +2,7 @@
 #include <stddef.h>
 #include <stdbool.h>
 #include <stdnoreturn.h>
+#include <console.h>
 #include <config.h>
 #include <menu.h>
 #include <lib/print.h>
@@ -10,7 +11,7 @@
 #include <lib/config.h>
 #include <lib/term.h>
 #include <lib/gterm.h>
-#include <lib/getchar.h>
+#include <lib/readline.h>
 #include <lib/uri.h>
 #include <mm/pmm.h>
 #include <drivers/vbe.h>
@@ -25,6 +26,7 @@
 #include <lib/misc.h>
 
 bool booting_from_editor = false;
+bool force_new_menu = false;
 
 static struct memmap_entry *rewound_memmap = NULL;
 static size_t rewound_memmap_entries = 0;
@@ -245,6 +247,8 @@ struct menu_entry *print_menu_entries(struct menu_entry *tree_main, int sub_coun
 
 extern void _old_menu(bool first_run);
 
+extern int shell_main();
+
 noreturn void _menu(bool first_run)
 {
     menu_init_memmap();
@@ -252,10 +256,14 @@ noreturn void _menu(bool first_run)
     menu_init_term();
 
     char *use_new_menu = config_get_value(NULL, 0, "INTERFACE_USE_NEW_MENU");
-    if (use_new_menu == NULL || strcmp(use_new_menu, "no") != 0)
+    if (use_new_menu != NULL)
     {
-        _old_menu(first_run);
+        if (!force_new_menu && strcmp(use_new_menu, "no") != 0)
+            _old_menu(first_run);
     }
+    else { if (!force_new_menu) _old_menu(first_run); }
+    force_new_menu = false;
+
 
     char *menu_branding = menu_get_branding();
 
@@ -270,9 +278,9 @@ refresh:
 
     set_cursor_pos_helper(1, 1);
     if (!selected_menu_entry->sub)
-        print("%s - ENTER: Boot, ARROWS: Navigate", menu_branding);
+        print("%s (WIP MENU) - ENTER: Boot, ARROWS: Navigate, C: Spawn a shell", menu_branding);
     else {
-        print("%s - ENTER: %s, ARROWS: Navigate", menu_branding, selected_menu_entry->expanded ? "Collapse": "Expand");
+        print("%s (WIP MENU) - ENTER: %s, ARROWS: Navigate, C: Spawn a shell", menu_branding, selected_menu_entry->expanded ? "Collapse": "Expand");
     }
 
     selected_menu_entry = print_menu_entries(menu_tree, 0, selected_entry, 1, 3);
@@ -283,6 +291,11 @@ refresh:
 
         switch (c)
         {
+        case 'C':
+        case 'c':
+            reset_term();
+            console();
+            goto refresh;
         case GETCHAR_CURSOR_UP:
             if (selected_entry == 0)
             {
@@ -389,13 +402,25 @@ noreturn void boot(char *config)
         chainload_next(config, cmdline);
 #if defined(BIOS)
     }
-    else if (!strcmp(proto, "bios_chainload"))
+    else if (!strcmp(proto, "bios_chainload") || !strcmp(proto, "chainload"))
     {
 #elif defined(UEFI)
     }
-    else if (!strcmp(proto, "efi_chainload"))
+    else if (!strcmp(proto, "efi_chainload") || !strcmp(proto, "chainload"))
     {
 #endif
+        if (!strcmp(proto, "chainload"))
+        {
+#ifdef UEFI
+            bool use_efi = true;
+#else
+            bool use_efi = false;
+#endif
+            print("NOTE: Using \"chainload\" is risky as the protocol behaves differently if using %s.\n", use_efi ? "BIOS" : "UEFI");
+            print("      Please modify your config file to use \"%s\" instead if \"chainload\".\n", use_efi ? "efi_chainload" : "bios_chainload");
+            print("Press any key to continue booting...\n");
+            getchar();
+        }
         chainload(config, cmdline);
     }
 

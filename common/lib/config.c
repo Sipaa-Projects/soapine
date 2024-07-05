@@ -3,7 +3,7 @@
 #include <lib/config.h>
 #include <lib/libc.h>
 #include <lib/misc.h>
-#include <lib/getchar.h>
+#include <lib/readline.h>
 #include <mm/pmm.h>
 #include <fs/file.h>
 #include <lib/print.h>
@@ -35,7 +35,12 @@ int init_config_disk(struct volume *part) {
      && (f = fopen(part, "/limine/limine.cfg")) == NULL
      && (f = fopen(part, "/boot/limine.cfg")) == NULL
      && (f = fopen(part, "/boot/limine/limine.cfg")) == NULL
-     && (f = fopen(part, "/EFI/BOOT/limine.cfg")) == NULL) {
+     && (f = fopen(part, "/EFI/BOOT/limine.cfg")) == NULL
+     && (f = fopen(part, "/soapine.cfg")) == NULL
+     && (f = fopen(part, "/soapine/soapine.cfg")) == NULL
+     && (f = fopen(part, "/boot/soapine.cfg")) == NULL
+     && (f = fopen(part, "/boot/soapine/soapine.cfg")) == NULL
+     && (f = fopen(part, "/EFI/BOOT/soapine.cfg")) == NULL) {
         case_insensitive_fopen = old_cif;
         return -1;
     }

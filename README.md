@@ -4,13 +4,6 @@
 
 Soapine is a fork of the Limine bootloader. (TODO: expand this section)
 
-### Donate
-
-If you want to support the work ([@mintsuki](https://github.com/mintsuki)) did on the original Limine, feel free to donate to him on Liberapay:
-<a href="https://liberapay.com/mintsuki/donate"><img alt="Donate using Liberapay" src="https://liberapay.com/assets/widgets/donate.svg"></a>
-
-Donations welcome, but absolutely not mandatory!
-
 ### Supported architectures
 * IA-32 (32-bit x86)
 * x86-64
@@ -32,9 +25,6 @@ Donations welcome, but absolutely not mandatory!
 ### Supported filesystems
 * FAT12/16/32
 * ISO9660 (CDs/DVDs)
-
-If your filesystem isn't listed here, please read [the philosophy](PHILOSOPHY.md) first, especially before
-opening issues or pull requests related to this.
 
 ### Minimum system requirements
 For 32-bit x86 systems, support is only ensured starting with those with

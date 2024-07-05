@@ -2,6 +2,7 @@
 #include <stddef.h>
 #include <stdbool.h>
 #include <stdnoreturn.h>
+#include <console.h>
 #include <config.h>
 #include <menu.h>
 #include <lib/print.h>
@@ -10,7 +11,7 @@
 #include <lib/config.h>
 #include <lib/term.h>
 #include <lib/gterm.h>
-#include <lib/getchar.h>
+#include <lib/readline.h>
 #include <lib/uri.h>
 #include <mm/pmm.h>
 #include <drivers/vbe.h>
@@ -165,6 +166,8 @@ static void putchar_tokencol(int type, char c) {
 
 static bool editor_no_term_reset = false;
 
+extern int shell_main();
+
 char *config_entry_editor(const char *title, const char *orig_entry) {
     FOR_TERM(TERM->autoflush = false);
 
@@ -222,12 +225,12 @@ refresh:
         size_t x, y;
         print("\n");
         terms[0]->get_cursor_pos(terms[0], &x, &y);
-        set_cursor_pos_helper(terms[0]->cols / 2 - DIV_ROUNDUP(strlen(menu_branding), 2), y);
-        print("\e[3%sm%s\e[37m", menu_branding_colour, menu_branding);
-        print("\n\n");
+        set_cursor_pos_helper(1, 1);
+        print("%s: Editing %s - \e[32mESC\e[0m Discard and Exit, \e[32mF10\e[0m Boot", menu_branding, title);
+        print("\n");
     }
 
-    print("    \e[32mESC\e[0m Discard and Exit    \e[32mF10\e[0m Boot\n\n");
+    //print("    \n\n");
 
     print(serial ? "/" : "┌");
     for (size_t i = 0; i < terms[0]->cols - 2; i++) {
@@ -239,13 +242,7 @@ refresh:
                 }
                 // FALLTHRU
             default: {
-                size_t title_length = strlen(title);
-                if (i == (terms[0]->cols / 2) - DIV_ROUNDUP(title_length, 2) - 1) {
-                    print("%s", title);
-                    i += title_length - 1;
-                } else {
-                    print(serial ? "-" : "─");
-                }
+                print(serial ? "-" : "─");
             }
         }
     }
@@ -309,7 +306,7 @@ refresh:
                 printed_early = true;
                 size_t x, y;
                 terms[0]->get_cursor_pos(terms[0], &x, &y);
-                if (y == terms[0]->rows - 3) {
+                if (y == terms[0]->rows - 1) {
                     print(serial ? ">" : "→");
                     set_cursor_pos_helper(0, y + 1);
                     print(serial ? "\\" : "└");
@@ -841,19 +838,13 @@ refresh:
             set_cursor_pos_helper(1, 1);
             if (selected_menu_entry != NULL) {
                 if (selected_menu_entry->sub == NULL) {
-                    print("%s - \e[32mARROWS\e[0m Select, \e[32mENTER\e[0m Boot%s", menu_branding,
+                    print("%s - \e[32mARROWS\e[0m Select, \e[32mENTER\e[0m Boot%s, \e[32mC\e[0m Spawn a shell", menu_branding,
                           editor_enabled ? ", \e[32mE\e[0m Edit, \e[32mB\e[0m Blank Entry" : "");
                 } else {
                     print("%s - \e[32mARROWS\e[0m Select, \e[32mENTER\e[0m %s%s", menu_branding,
                           selected_menu_entry->expanded ? "Collapse" : "Expand", editor_enabled ? ", \e[32mB\e[0m Blank Entry" : "");
                 }
             }
-#if defined(UEFI)
-            if (reboot_to_firmware_supported) {
-                set_cursor_pos_helper(terms[0]->cols - 17, 1);
-                print("\e[32mS\e[0m Firmware Setup");
-            }
-#endif
         }
         set_cursor_pos_helper(x, y);
     }
@@ -903,6 +894,11 @@ refresh:
         c = getchar();
 timeout_aborted:
         switch (c) {
+            case 'C':
+            case 'c':
+                reset_term();
+                console();
+                goto refresh;
             case '1': case '2': case '3': case '4': case '5':
             case '6': case '7': case '8': case '9': {
                 int ent = (c - '0') - 1;
@@ -980,15 +976,6 @@ timeout_aborted:
                 }
                 break;
             }
-#if defined(UEFI)
-            case 's':
-            case 'S': {
-                if (reboot_to_firmware_supported) {
-                    reboot_to_fw_ui();
-                }
-                break;
-            }
-#endif
             case 'b':
             case 'B': {
                 if (editor_enabled) {

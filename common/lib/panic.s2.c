@@ -8,7 +8,7 @@
 #   include <efi.h>
 #endif
 #include <lib/misc.h>
-#include <lib/getchar.h>
+#include <lib/readline.h>
 #include <lib/gterm.h>
 #include <lib/term.h>
 #include <mm/pmm.h>
@@ -60,6 +60,7 @@ noreturn void panic(bool allow_menu, const char *fmt, ...) {
         term_notready();
 
         menu(false);
+        
 /*
         fb_clear(&fbinfo);
 

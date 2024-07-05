@@ -21,7 +21,7 @@
 #include <pxe/tftp.h>
 #include <drivers/disk.h>
 #include <sys/lapic.h>
-#include <lib/getchar.h>
+#include <lib/readline.h>
 #include <sys/cpu.h>
 
 void stage3_common(void);
@@ -105,7 +105,12 @@ could_not_match:
                  && (f = fopen(volume_index[i], "/limine/limine.cfg")) == NULL
                  && (f = fopen(volume_index[i], "/boot/limine.cfg")) == NULL
                  && (f = fopen(volume_index[i], "/boot/limine/limine.cfg")) == NULL
-                 && (f = fopen(volume_index[i], "/EFI/BOOT/limine.cfg")) == NULL) {
+                 && (f = fopen(volume_index[i], "/EFI/BOOT/limine.cfg")) == NULL
+                 && (f = fopen(volume_index[i], "/soapine.cfg")) == NULL
+                 && (f = fopen(volume_index[i], "/soapine/soapine.cfg")) == NULL
+                 && (f = fopen(volume_index[i], "/boot/soapine.cfg")) == NULL
+                 && (f = fopen(volume_index[i], "/boot/soapine/soapine.cfg")) == NULL
+                 && (f = fopen(volume_index[i], "/EFI/BOOT/soapine.cfg")) == NULL) {
                     case_insensitive_fopen = old_cif;
                     continue;
                 }
