@@ -204,8 +204,6 @@ struct menu_entry *print_menu_entries(struct menu_entry *tree_main, int sub_coun
     struct menu_entry *sme = NULL;
     struct menu_entry *cme = tree_main;
 
-
-
     while (cme != NULL)
     {
         if (!cme->sub) {
@@ -221,9 +219,10 @@ struct menu_entry *print_menu_entries(struct menu_entry *tree_main, int sub_coun
 
             if (sub_count > 0)
             {
-                for (int unused = 0; i < sub_count; i++)
+                for (int unused = 0; i < sub_count; i++) {
+                    (void)unused; // FUCK YOU LLVM!!!! (ps: we shouldn't even support bimbows)
                     print("-");
-
+                }
                 print(" ");
             }
 
