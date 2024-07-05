@@ -26,14 +26,14 @@ CPPFLAGS := \
 LDFLAGS := \
 	-shared \
 	-Bsymbolic \
-	-Lgnu-efi/x86_64/lib \
-	-Lgnu-efi/x86_64/gnuefi \
-	-Tgnu-efi/gnuefi/elf_x86_64_efi.lds \
-	gnu-efi/x86_64/gnuefi/crt0-efi-x86_64.o
+#	-Lgnu-efi/x86_64/lib \
+#	-Lgnu-efi/x86_64/gnuefi \
+#	-Tgnu-efi/gnuefi/elf_x86_64_efi.lds \
+#	gnu-efi/x86_64/gnuefi/crt0-efi-x86_64.o
 	
 LDLIBS := \
-	-lgnuefi \
-	-lefi
+#	-lgnuefi \
+#	-lefi
 
 OBJCOPYFLAGS := \
 	-j .text \
@@ -56,7 +56,8 @@ DEPS_C = $(OBJS_C:$(OBJDIR)/%.o=$(OBJDIR)/%.o.d)
 
 all: $(BIN).efi
 
-$(BIN).efi: $(LIBGNUEFI) $(OBJS_C) 
+#$(BIN).efi: $(LIBGNUEFI) $(OBJS_C) 
+$(BIN).efi: aurix-efi $(OBJS_C)
 	@mkdir -p $(BINDIR)
 
 	@echo "    LD       $(BIN).so"
@@ -72,6 +73,9 @@ $(OBJDIR)/%.o: $(SRCDIR)/%.c
 	@echo "    CC       $<"
 	@$(CC) $(CFLAGS) $(CPPFLAGS) -c $< -o $@
 #	@$(CC) -MM $(CFLAGS) $(CPPFLAGS) $< > $@.d
+
+aurix-efi:
+	@git clone https://github.com/aurixos/efi aurix-efi
 
 $(LIBGNUEFI):
 	@git clone https://git.code.sf.net/p/gnu-efi/code gnu-efi
