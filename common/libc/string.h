@@ -8,3 +8,6 @@ int wctomb (char *s, wchar_t u);
 size_t mbstowcs (wchar_t *__pwcs, const char *__s, size_t __n);
 size_t wcstombs (char *__s, const wchar_t *__pwcs, size_t __n);
 int strlen(char *str);
+int strncmp(const char *s1, const char *s2, size_t n);
+int strcmp(const char *s1, const char *s2);
+char *strncpy(char *dest, const char *src, size_t n);

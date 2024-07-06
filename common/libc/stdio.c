@@ -17,6 +17,13 @@ void printf(char *format, ...) {
     term_write(buf);
 }
 
+void snprintf(char *buf, int bufsz, char *format, ...) {
+    va_list args;
+    va_start(args, buf);
+    npf_vsnprintf(buf, PRINTF_BUF_SIZE, format, args);
+    va_end(args);
+}
+
 void vsnprintf(char *buf, int bufsz, char *format, va_list args)
 {
     npf_vsnprintf(buf, bufsz, format, args);

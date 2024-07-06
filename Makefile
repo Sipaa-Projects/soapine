@@ -78,9 +78,11 @@ $(LIBGNUEFI):
 	@git clone https://git.code.sf.net/p/gnu-efi/code gnu-efi
 	@make -C gnu-efi
 
-clean:
+clean-bin:
 	@rm -rf obj/
 	@rm -rf bin/
+
+clean: clean-bin
 	@rm -rf gnu-efi/
 	@rm -rf ovmf/
 

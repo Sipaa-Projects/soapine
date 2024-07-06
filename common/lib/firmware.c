@@ -31,7 +31,7 @@ char firmware_console_getchar()
 void *firmware_malloc(int size)
 {
     void *ptr = NULL;
-    status = uefi_call_wrapper(BS->AllocatePool, 3, EfiLoaderData, (UINTN)size, ptr);
+    status = uefi_call_wrapper(BS->AllocatePool, 3, EfiLoaderData, (UINTN)size, &ptr);
     if (EFI_ERROR(status))
         return NULL;
     return ptr;

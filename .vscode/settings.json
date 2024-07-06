@@ -11,6 +11,9 @@
         "stdarg.h": "c",
         "stdio.h": "c",
         "istream": "c",
-        "firmware.h": "c"
+        "firmware.h": "c",
+        "any": "c",
+        "string.h": "c",
+        "jsmn.h": "c"
     }
 }
