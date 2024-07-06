@@ -19,14 +19,14 @@ terminal_type_t term_type;
 
 void dummy() {}
 
-extern void _st_clear();
+extern void __st_clear();
 
 void term_clear() {
     if (term_type == FALLBACK) {
         gST->ConOut->ClearScreen(gST->ConOut);
     }
     else if (term_type == FBTERM)
-        _st_clear();
+        __st_clear();
 }
 
 void term_write(char *str)
@@ -89,7 +89,7 @@ void term_reset_color(terminal_colorreset_type_t t) {
         } else if (t == BGONLY) {
             ctx.color_bg = (BG_B << 16) | (BG_G << 8) | BG_R;
         } else {
-            ctx.color_bg = (BG_B << 16) | (BG_G << 8) | BG_R;
+            ctx.color_fg = (FG_B << 16) | (FG_G << 8) | FG_R;
             ctx.color_bg = (BG_B << 16) | (BG_G << 8) | BG_R;
         }
     } else if (term_type == FALLBACK) {

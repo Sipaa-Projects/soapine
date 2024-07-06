@@ -17,6 +17,11 @@ void printf(char *format, ...) {
     term_write(buf);
 }
 
+void vsnprintf(char *buf, int bufsz, char *format, va_list args)
+{
+    npf_vsnprintf(buf, bufsz, format, args);
+}
+
 char getchar()
 {
     return firmware_console_getchar();

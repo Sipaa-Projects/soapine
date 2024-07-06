@@ -3,6 +3,8 @@
 #include <lib/term.h>
 #include <stdbool.h>
 
+unsigned long long firmware_get_last_error();
+
 char firmware_console_getchar();
 void firmware_console_print(char *text);
 void firmware_console_set_cursor(bool visible, int x, int y);
@@ -12,3 +14,8 @@ void firmware_console_set_color(bool is_fg, int r, int g, int b); // Both VGA te
 
 void firmware_usleep(int usec);
 void firmware_sleep(int sec);
+
+void *firmware_malloc(int size);
+void firmware_free(void *ptr);
+
+void firmware_reboot_system();

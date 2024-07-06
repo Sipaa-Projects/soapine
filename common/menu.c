@@ -3,7 +3,8 @@
 #include <bootloader-info.h>
 #include <menu.h>
 #include <stdio.h>
-#include <libc/fileio.h>
+#include <stdlib.h>
+#include <fileio.h>
 
 #define HEADERBAR_HEIGHT 3
 #define BRANDING_R 82 
@@ -57,12 +58,15 @@ void render_headerbar() {
 
 __attribute__((noreturn)) void menu(bool first_run)
 {
+render:
+    term_clear();
     render_headerbar();
 
     term_set_cursor(true, 2, 2 + HEADERBAR_HEIGHT);
     while (1)
     { 
         char c = getchar();
+        
         printf("%c", c);
     }
 }

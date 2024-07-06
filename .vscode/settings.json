@@ -10,6 +10,7 @@
         "npf.h": "c",
         "stdarg.h": "c",
         "stdio.h": "c",
-        "istream": "c"
+        "istream": "c",
+        "firmware.h": "c"
     }
 }
