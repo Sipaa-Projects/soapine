@@ -3,6 +3,7 @@
 #include <bootloader-info.h>
 #include <menu.h>
 #include <stdio.h>
+#include <libc/fileio.h>
 
 #define HEADERBAR_HEIGHT 3
 #define BRANDING_R 82 
@@ -51,7 +52,7 @@ void render_headerbar() {
     printf("C", SOAPINE_VERSION);
     term_reset_color(FGONLY);
 
-    printf(": Console");
+    printf(": Console\n");
 }
 
 __attribute__((noreturn)) void menu(bool first_run)

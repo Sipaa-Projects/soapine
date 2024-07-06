@@ -16,4 +16,4 @@ run-uefi-x86_64: $(BIN).efi ovmf-bin
 	@echo "Hello" > $(BINDIR)/hello.txt
 	@sudo cp $(BINDIR)/hello.txt $(BINDIR)/mnt/test
 	@sudo umount $(BINDIR)/mnt
-	@qemu-system-x86_64 -accel kvm -m 1g -bios ovmf/OVMF-x64.fd -hda $(BINDIR)/disk-uefi-x86_64.img
+	@qemu-system-x86_64 -accel kvm -m 1g -bios ovmf/OVMF-x64.fd -drive file=$(BINDIR)/disk-uefi-x86_64.img
