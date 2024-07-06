@@ -1,6 +1,4 @@
 #pragma once
-#include <efi.h>
-#include <efilib.h>
 #include <stdbool.h>
  
 typedef enum terminal_type {
@@ -35,7 +33,7 @@ extern terminal_type_t term_type;
 #define TERM_YELLOW          (TERM_BROWN | TERM_BRIGHT)
 #define TERM_WHITE           (TERM_BLUE | TERM_GREEN | TERM_RED | TERM_BRIGHT)
 
-void term_init(terminal_type_t preferred, EFI_SYSTEM_TABLE *SystemTable);
+void term_init(terminal_type_t preferred);
 void term_set_cursor(bool enabled, int x, int y);
 void term_set_color(bool is_fg, int r, int g, int b);
 void term_reset_color(terminal_colorreset_type_t t);
