@@ -15,12 +15,10 @@ st_ctx ctx = {
 
         .cur_x = 0,
         .cur_y = 0,
-        .cur_saved_x = 0,
-        .cur_saved_y = 0,
         .cur_visible = true,
 
         .color_bg = 0x000000,
-        .color_fg = 0xaaaaaa,
+        .color_fg = 0xFFFFFF,
         .uc_codepoint = 0,
         .uc_remaining = 0,
 
@@ -28,18 +26,7 @@ st_ctx ctx = {
         .esc_type = 0,
         .esc_cur_arg = 0,
         .esc_ctrl_args = {},
-
-        .screen_table = {},
 };
-
-
-//===============================Helper functions===============================
-
-void __st_small_memcpy(void* dest, const void* src, st_u32 n){
-    for(st_u32 i = 0; i < n; i++){
-        ((st_u8*)dest)[i] = ((const st_u8*)src)[i];
-    }
-}
 
 //===============================Drawing functions===============================
 
@@ -77,40 +64,25 @@ st_u16 __st_get_glyph(st_u64 c);
 
 void __st_render_cursor(){
     if(ctx.cur_visible){
-        st_u16 g      = ctx.screen_table[ctx.cur_x + ctx.cur_y * (ctx.fb_width / ctx.font_width)].glyph_num;
-        st_u32 col_bg = ctx.screen_table[ctx.cur_x + ctx.cur_y * (ctx.fb_width / ctx.font_width)].bg_col;
-        st_u32 col_fg = ctx.screen_table[ctx.cur_x + ctx.cur_y * (ctx.fb_width / ctx.font_width)].fg_col;
-        __st_plot_glyph(ctx.cur_x, ctx.cur_y, g, col_bg, col_fg);
+        for (st_u32 i = 0; i < ctx.font_width; i++) {
+            for (st_u32 j = 0; j < ctx.font_height; j++) {
+                __st_plot_pixel(ctx.cur_x * ctx.font_width + i, ctx.cur_y * ctx.font_height + j, ctx.color_fg);
+            }
+        }
     }
 }
 
 void __st_delete_cursor(){
     if(ctx.cur_visible){
-        st_u16 g      = ctx.screen_table[ctx.cur_x + ctx.cur_y * (ctx.fb_width / ctx.font_width)].glyph_num;
-        st_u32 col_bg = ctx.screen_table[ctx.cur_x + ctx.cur_y * (ctx.fb_width / ctx.font_width)].bg_col;
-        st_u32 col_fg = ctx.screen_table[ctx.cur_x + ctx.cur_y * (ctx.fb_width / ctx.font_width)].fg_col;
-        __st_plot_glyph(ctx.cur_x, ctx.cur_y, g, col_fg, col_bg);
-    }
-}
-
-void __st_redraw(st_u8 starty){
-    for(st_u32 i = 0; i < ctx.fb_width / ctx.font_width; i++){
-        for(st_u32 j = starty; j < ctx.fb_height / ctx.font_height; j++){
-            register st_color_cell cell = ctx.screen_table[i + j * (ctx.fb_width / ctx.font_width)];
-            if (cell.glyph_num == ctx.screen_table[i + (j - starty) * (ctx.fb_width / ctx.font_width)].glyph_num) continue;
-            __st_plot_glyph(i,j - starty,cell.glyph_num,cell.fg_col,cell.bg_col);
+        for (st_u32 i = 0; i < ctx.font_width; i++) {
+            for (st_u32 j = 0; j < ctx.font_height; j++) {
+                __st_plot_pixel(ctx.cur_x * ctx.font_width + i, ctx.cur_y * ctx.font_height + j, ctx.color_bg);
+            }
         }
     }
 }
 
 void __st_clear(){
-    for(st_u32 i = 0; i < ctx.fb_width / ctx.font_width; i++){
-        for(st_u32 j = 0; j < ctx.fb_height / ctx.font_height; j++){
-            ctx.screen_table[i + j * (ctx.fb_width / ctx.font_width)].bg_col = ctx.color_bg;
-            ctx.screen_table[i + j * (ctx.fb_width / ctx.font_width)].fg_col = ctx.color_fg;
-            ctx.screen_table[i + j * (ctx.fb_width / ctx.font_width)].glyph_num = 0;
-        }
-    }
     for(st_u32 i = 0; i < ctx.fb_width * ctx.fb_height; i++){
         __st_plot_pixel(i % ctx.fb_width, i / ctx.fb_width, ctx.color_bg);
     }
@@ -121,29 +93,12 @@ void __st_clear(){
 }
 
 void __st_scroll(){
-    if(ctx.cur_y >= (ctx.fb_height/ctx.font_height) - ST_SCROLL_TRESHOLD){
-        st_u32 n = ctx.cur_y - ((ctx.fb_height/ctx.font_height) - ST_SCROLL_TRESHOLD);
+    if(ctx.cur_y >= (ctx.fb_height/ctx.font_height) - 1){
+        st_u32 n = ctx.cur_y - ((ctx.fb_height/ctx.font_height) - 1);
 
-        // fake it visually by starting n lines bellow the top
-        __st_redraw(n);
-
-        // commit it to the table
-        __st_small_memcpy(ctx.screen_table, ctx.screen_table + (ctx.fb_width / ctx.font_width) * n, (ctx.fb_width / ctx.font_width) * ((ctx.fb_height / ctx.font_height)  - ST_SCROLL_TRESHOLD + n) * sizeof(st_color_cell));
-
-       ctx.cur_y = (ctx.fb_height/ctx.font_height) - ST_SCROLL_TRESHOLD;
+        //TODO: readd scrolling
+        //ctx.cur_y = (ctx.fb_height/ctx.font_height) - 1;
     }
-    __st_render_cursor();
-}
-
-void __st_save_state(){
-    ctx.cur_saved_x = ctx.cur_x;
-    ctx.cur_saved_y = ctx.cur_y;
-}
-
-void __st_restore_state(){
-    __st_delete_cursor();
-    ctx.cur_x = ctx.cur_saved_x;
-    ctx.cur_y = ctx.cur_saved_y;
     __st_render_cursor();
 }
 
@@ -243,12 +198,6 @@ void __st_eparse( char c){
         case '[':
             ctx.esc_type = 1;
             return;
-        case '7':
-            __st_save_state();
-            break;
-        case '8':
-            __st_restore_state();
-            break;
         case 'c':
             __st_clear();
             break;
@@ -269,26 +218,6 @@ void __st_eparse_ctrl(char c){
             }
             ctx.esc_cur_arg++;
             return;
-        case 'A':
-            __st_delete_cursor();
-            ctx.cur_y -= ctx.esc_ctrl_args[0];
-            __st_scroll();
-            break;
-        case 'B':
-            __st_delete_cursor();
-            ctx.cur_y += ctx.esc_ctrl_args[0];
-            __st_scroll();
-            break;
-        case 'C':
-            __st_delete_cursor();
-            ctx.cur_x += ctx.esc_ctrl_args[0];
-            __st_scroll();
-            break;
-        case 'D':
-            __st_delete_cursor();
-            ctx.cur_x -= ctx.esc_ctrl_args[0];
-            __st_scroll();
-            break;
         case 'E':
             __st_delete_cursor();
             ctx.cur_y += ctx.esc_ctrl_args[0];
@@ -318,12 +247,6 @@ void __st_eparse_ctrl(char c){
                 break;
             }
             __st_clear();
-            break;
-        case 's':
-            __st_save_state();
-            break;
-        case 'u':
-            __st_restore_state();
             break;
         case 'm':
             __st_sgr();
@@ -411,12 +334,7 @@ void st_write(st_u8 c){
             ctx.esc_type = 0;
             break;
         default:
-            ctx.screen_table[ctx.cur_x + ctx.cur_y * (ctx.fb_width / ctx.font_width)].fg_col = ctx.color_fg;
-            ctx.screen_table[ctx.cur_x + ctx.cur_y * (ctx.fb_width / ctx.font_width)].bg_col = ctx.color_bg;
-
-            st_u16 g = __st_get_glyph(ctx.uc_codepoint);
-            ctx.screen_table[ctx.cur_x + ctx.cur_y * (ctx.fb_width / ctx.font_width)].glyph_num = g & 0xFFF;
-            __st_plot_glyph(ctx.cur_x, ctx.cur_y, g, ctx.color_fg, ctx.color_bg);
+            __st_plot_glyph(ctx.cur_x, ctx.cur_y, __st_get_glyph(ctx.uc_codepoint), ctx.color_fg, ctx.color_bg);
 
             ctx.cur_x++;
             if(ctx.cur_x >= ctx.fb_width/ctx.font_width) goto newline;

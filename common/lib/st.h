@@ -21,21 +21,8 @@ typedef unsigned char st_bool;
     #define NULL ((void *)0)
 #endif
 
-#ifndef ST_TAB_WIDTH
+// config goes here
 #define ST_TAB_WIDTH 4
-#endif
-
-#ifndef ST_MAX_COLS
-#define ST_MAX_COLS 100
-#endif
-
-#ifndef ST_MAX_ROWS
-#define ST_MAX_ROWS 100
-#endif
-
-#ifndef ST_SCROLL_TRESHOLD
-#define ST_SCROLL_TRESHOLD 1
-#endif
 
 #define PSF1_MAGIC 0x0436
 #define PSF2_MAGIC 0x864ab572
@@ -66,12 +53,6 @@ typedef struct {
 } PACKED psf2_header;
 
 typedef struct {
-    st_u16 glyph_num : 12;
-    st_u32 fg_col : 24;
-    st_u32 bg_col : 24;
-} PACKED st_color_cell;
-
-typedef struct {
     //Framebuffer stuff
     st_u32*  fb_addr;
     st_u32   fb_width;
@@ -88,8 +69,6 @@ typedef struct {
     //Cursor stuff
     st_u16   cur_x;
     st_u16   cur_y;
-    st_u16   cur_saved_x;
-    st_u16   cur_saved_y;
     st_bool  cur_visible;
 
     //Font stuff
@@ -114,8 +93,6 @@ typedef struct {
     st_u8   esc_type : 3;
     st_u8   esc_cur_arg;
     st_u16  esc_ctrl_args[ANSI_MAX_ARGS];
-
-    st_color_cell screen_table[ST_MAX_ROWS * ST_MAX_COLS];
 
 } st_ctx;
 

@@ -2,9 +2,7 @@
 #include <lib/libc.h>
 #include <lib/term.h>
 #include <lib/term_font.h>
-#include <trdparty/st.h>
-#include <efi.h>
-#include <efilib.h>
+#include <lib/st.h>
 
 terminal_type_t term_type;
 
@@ -19,14 +17,14 @@ void term_write(char *str)
             st_write(str[i]);
 }
 
-void term_init(terminal_type_t preferred)
+void term_init(terminal_type_t preferred,EFI_SYSTEM_TABLE *SystemTable)
 {
     switch (preferred)
     {
     case FBTERM:
         if (!fb_init(-1, -1, -1)) { // Let the firmware automatically choose a mode for us.
             //Print(L"lib/term: fb_init fail. Using fallback.\n");
-            term_init(FALLBACK); // Use a fallback terminal if it fails.
+            term_init(FALLBACK, SystemTable); // Use a fallback terminal if it fails.
             return;
         }
         fb_clear();

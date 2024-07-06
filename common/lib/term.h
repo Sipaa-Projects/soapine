@@ -1,4 +1,6 @@
 #pragma once
+#include <efi.h>
+#include <efilib.h>
  
 typedef enum terminal_type {
     FALLBACK, // VGA text mode or UEFI console
@@ -8,7 +10,7 @@ typedef enum terminal_type {
 
 extern terminal_type_t term_type;
 
-void term_init(terminal_type_t preferred);
+void term_init(terminal_type_t preferred,EFI_SYSTEM_TABLE *SystemTable);
 void term_set_cursor_pos(int x, int y);
 void term_set_color(char r, char g, char b); // Char goes up to 255, RGB values too.
 void term_write(char *str);

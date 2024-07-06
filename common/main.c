@@ -6,7 +6,7 @@
 EFI_STATUS EFIAPI efi_main (EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE *SystemTable)
 {
     InitializeLib(ImageHandle, SystemTable);
-    term_init(FBTERM);
+    term_init(FBTERM, SystemTable);
 
     term_write("Hello World! Café (to test accents)\n");
 
