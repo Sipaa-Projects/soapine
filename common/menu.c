@@ -61,7 +61,8 @@ __attribute__((noreturn)) void menu(bool first_run)
 
     term_set_cursor(true, 2, 2 + HEADERBAR_HEIGHT);
     while (1)
-    {
-
+    { 
+        char c = getchar();
+        printf("%c", c);
     }
 }

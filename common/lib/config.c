@@ -1,0 +1,6 @@
+
+
+void config_init()
+{
+
+}

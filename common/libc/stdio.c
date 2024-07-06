@@ -1,7 +1,8 @@
-#include <stdio.h>
-#include <stdarg.h>
+#include <lib/firmware.h>
 #include <lib/term.h>
 #include <trdparty/npf.h>
+#include <stdio.h>
+#include <stdarg.h>
 
 #define PRINTF_BUF_SIZE 2048
 
@@ -18,6 +19,5 @@ void printf(char *format, ...) {
 
 char getchar()
 {
-    return 0;
-    //return firmware_getchar();
+    return firmware_console_getchar();
 }
