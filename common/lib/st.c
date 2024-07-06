@@ -18,7 +18,7 @@ st_ctx ctx = {
         .cur_visible = true,
 
         .color_bg = 0x000000,
-        .color_fg = 0xAAAAAA,
+        .color_fg = 0xFFFFFF,
         .uc_codepoint = 0,
         .uc_remaining = 0,
 
@@ -27,15 +27,6 @@ st_ctx ctx = {
         .esc_cur_arg = 0,
         .esc_ctrl_args = {},
 };
-
-
-//===============================Helper functions===============================
-
-void __st_small_memcpy(void* dest, const void* src, st_u32 n){
-    for(st_u32 i = 0; i < n; i++){
-        ((st_u8*)dest)[i] = ((const st_u8*)src)[i];
-    }
-}
 
 //===============================Drawing functions===============================
 
