@@ -9,6 +9,7 @@
         "efilib.h": "c",
         "npf.h": "c",
         "stdarg.h": "c",
-        "stdio.h": "c"
+        "stdio.h": "c",
+        "istream": "c"
     }
 }

@@ -14,8 +14,8 @@ EFI_STATUS EFIAPI efi_main (EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE *SystemTabl
     if (s != EFI_SUCCESS)
         printf("Failed to init fio: %x", s);
 
-    EFI_FILE* file = open(NULL, "test/hello.txt");
-    printf("a");
+    EFI_FILE* file = open(NULL, "hello.txt");
+	
     if(file == NULL){
         printf("No file :cry:");
         close(file);

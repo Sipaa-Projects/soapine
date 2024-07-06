@@ -14,6 +14,32 @@ run-uefi-x86_64: $(BIN).efi ovmf-bin
 	@sudo cp $(BINDIR)/soapine-x86_64.efi $(BINDIR)/mnt/EFI/BOOT/BOOTX64.efi
 	@sudo mkdir -p $(BINDIR)/mnt/test
 	@echo "Hello" > $(BINDIR)/hello.txt
-	@sudo cp $(BINDIR)/hello.txt $(BINDIR)/mnt/test
+	@sudo cp $(BINDIR)/hello.txt $(BINDIR)/mnt
 	@sudo umount $(BINDIR)/mnt
 	@qemu-system-x86_64 -accel kvm -m 1g -bios ovmf/OVMF-x64.fd -drive file=$(BINDIR)/disk-uefi-x86_64.img
+
+debug-uefi-x86_64: $(BIN).efi ovmf-bin
+	@mkdir -p $(BINDIR)/mnt
+	@dd if=/dev/zero of=$(BINDIR)/disk-uefi-x86_64.img bs=1M count=64
+	@mkfs.fat -F 32 $(BINDIR)/disk-uefi-x86_64.img
+	@sudo mount -o loop $(BINDIR)/disk-uefi-x86_64.img $(BINDIR)/mnt
+	@sudo mkdir -p $(BINDIR)/mnt/EFI/BOOT
+	@sudo cp $(BINDIR)/soapine-x86_64.efi $(BINDIR)/mnt/EFI/BOOT/BOOTX64.efi
+	@sudo mkdir -p $(BINDIR)/mnt/test
+	@echo "Hello" > $(BINDIR)/hello.txt
+	@sudo cp $(BINDIR)/hello.txt $(BINDIR)/mnt
+	@sudo umount $(BINDIR)/mnt
+	@qemu-system-x86_64 -m 1g -bios ovmf/OVMF-x64.fd -drive file=$(BINDIR)/disk-uefi-x86_64.img -d int,guest_errors --no-reboot --no-shutdown
+
+debug-gdb-uefi-x86_64: $(BIN).efi ovmf-bin
+	@mkdir -p $(BINDIR)/mnt
+	@dd if=/dev/zero of=$(BINDIR)/disk-uefi-x86_64.img bs=1M count=64
+	@mkfs.fat -F 32 $(BINDIR)/disk-uefi-x86_64.img
+	@sudo mount -o loop $(BINDIR)/disk-uefi-x86_64.img $(BINDIR)/mnt
+	@sudo mkdir -p $(BINDIR)/mnt/EFI/BOOT
+	@sudo cp $(BINDIR)/soapine-x86_64.efi $(BINDIR)/mnt/EFI/BOOT/BOOTX64.efi
+	@sudo mkdir -p $(BINDIR)/mnt/test
+	@echo "Hello" > $(BINDIR)/hello.txt
+	@sudo cp $(BINDIR)/hello.txt $(BINDIR)/mnt
+	@sudo umount $(BINDIR)/mnt
+	@qemu-system-x86_64 -accel kvm -m 1g -bios ovmf/OVMF-x64.fd -drive file=$(BINDIR)/disk-uefi-x86_64.img --no-reboot --no-shutdown -S -s
