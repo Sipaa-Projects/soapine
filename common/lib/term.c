@@ -80,13 +80,25 @@ void term_set_cursor(bool enabled, int x, int y) {
     }
 }
 
-void term_reset_color() {
+void term_reset_color(terminal_colorreset_type_t t) {
     if (term_type == FBTERM) {
-        ctx.color_bg = (BG_B << 16) | (BG_G << 8) | BG_R;
-        ctx.color_fg = (FG_B << 16) | (FG_G << 8) | FG_R;
+        if (t == FGONLY) {
+            ctx.color_fg = (FG_B << 16) | (FG_G << 8) | FG_R;
+        } else if (t == BGONLY) {
+            ctx.color_bg = (BG_B << 16) | (BG_G << 8) | BG_R;
+        } else {
+            ctx.color_bg = (BG_B << 16) | (BG_G << 8) | BG_R;
+            ctx.color_bg = (BG_B << 16) | (BG_G << 8) | BG_R;
+        }
     } else if (term_type == FALLBACK) {
-        uefi_call_wrapper(gST->ConOut->SetAttribute, 2, gST->ConOut, EFI_BACKGROUND_BLACK);
-        uefi_call_wrapper(gST->ConOut->SetAttribute, 2, gST->ConOut, EFI_WHITE);
+        if (t == FGONLY) {
+            uefi_call_wrapper(gST->ConOut->SetAttribute, 2, gST->ConOut, EFI_WHITE);
+        } else if (t == BGONLY) {
+            uefi_call_wrapper(gST->ConOut->SetAttribute, 2, gST->ConOut, EFI_BACKGROUND_BLACK);
+        } else {
+            uefi_call_wrapper(gST->ConOut->SetAttribute, 2, gST->ConOut, EFI_BACKGROUND_BLACK);
+            uefi_call_wrapper(gST->ConOut->SetAttribute, 2, gST->ConOut, EFI_WHITE);
+        }
     }
 }
 

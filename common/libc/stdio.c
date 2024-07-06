@@ -13,5 +13,10 @@ void printf(char *format, ...) {
     npf_vsnprintf(buf, PRINTF_BUF_SIZE, format, args);
     va_end(args);
 
-    term_write(format);
+    term_write(buf);
+}
+
+char getchar()
+{
+    
 }

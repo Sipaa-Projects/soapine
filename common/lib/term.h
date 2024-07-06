@@ -9,6 +9,12 @@ typedef enum terminal_type {
     NONE,     // No terminal
 } terminal_type_t;
 
+typedef enum terminal_colorreset_type {
+    ALL,      // FG & BG
+    BGONLY,   // Bg only
+    FGONLY,     // Fg only
+} terminal_colorreset_type_t;
+
 extern terminal_type_t term_type;
 
 #define TERM_BLACK   0x00
@@ -32,6 +38,6 @@ extern terminal_type_t term_type;
 void term_init(terminal_type_t preferred, EFI_SYSTEM_TABLE *SystemTable);
 void term_set_cursor(bool enabled, int x, int y);
 void term_set_color(bool is_fg, int r, int g, int b);
-void term_reset_color();
+void term_reset_color(terminal_colorreset_type_t t);
 void term_write(char *str);
 void term_clear();
