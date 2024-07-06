@@ -2,7 +2,7 @@
 #include <lib/libc.h>
 #include <lib/term.h>
 #include <lib/term_font.h>
-#include <trdparty/st.h>
+#include <lib/st.h>
 #include <efi.h>
 #include <efilib.h>
 
