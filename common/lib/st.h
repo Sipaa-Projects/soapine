@@ -96,6 +96,8 @@ typedef struct {
 
 } st_ctx;
 
+extern st_ctx ctx;
+
 void st_write(st_u8 c);
 
 void st_init(st_u32* fb_addr, st_u32 fb_width, st_u32 fb_height, st_u32 fb_pitch,

@@ -21,6 +21,7 @@ CFLAGS := \
 CPPFLAGS := \
 	-Ignu-efi/inc \
 	-I$(SRCDIR) \
+	-I$(SRCDIR)/libc \
 	-MMD
 
 LDFLAGS := \

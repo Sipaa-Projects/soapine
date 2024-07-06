@@ -5,6 +5,10 @@
         "efi.h": "c",
         "compare": "c",
         "cstdint": "c",
-        "format": "c"
+        "format": "c",
+        "efilib.h": "c",
+        "npf.h": "c",
+        "stdarg.h": "c",
+        "stdio.h": "c"
     }
 }
