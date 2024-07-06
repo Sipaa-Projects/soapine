@@ -58,6 +58,9 @@ __attribute__((noreturn)) void menu(bool first_run)
 {
     render_headerbar();
 
+    term_set_cursor(true, 2, 2 + HEADERBAR_HEIGHT);
     while (1)
-        ;;
+    {
+
+    }
 }

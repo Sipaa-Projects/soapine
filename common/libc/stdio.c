@@ -18,5 +18,6 @@ void printf(char *format, ...) {
 
 char getchar()
 {
-    
+    return 0;
+    //return firmware_getchar();
 }
