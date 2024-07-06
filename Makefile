@@ -7,7 +7,7 @@ LIBGNUEFI := gnu-efi/x86_64/gnuefi/libgnuefi.a
 
 CC        := x86_64-elf-gcc
 LD        := x86_64-elf-ld
-OBJCOPY   := x86_64-elf-objcopy
+OBJCOPY   := objcopy # drink my ass
 
 CFLAGS := \
 	-fpic \
