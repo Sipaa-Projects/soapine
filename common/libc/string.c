@@ -173,3 +173,8 @@ char *strdup(char *str)
     strncpy(newstr, str, size);
     return newstr;
 }
+
+void _memset(void *ptr, int v, size_t s) {
+    for (int i = 0; i < s; i++)
+        (*(int*)ptr) = v;
+}

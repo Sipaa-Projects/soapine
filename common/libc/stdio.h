@@ -14,6 +14,8 @@
 #define GETCHAR_PGDOWN 265
 #define GETCHAR_ESC 266
 #define GETCHAR_ENTER 267
+#define GETCHAR_BACKSPACE 268
+#define GETCHAR_TAB 269
 
 void printf(char *format, ...);
 void vsnprintf(char *buf, int bufsz, char *format, va_list args);

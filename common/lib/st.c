@@ -98,6 +98,8 @@ void __st_scroll(){
 
         //TODO: readd scrolling
         //ctx.cur_y = (ctx.fb_height/ctx.font_height) - 1;
+        ctx.cur_x = 0;
+        ctx.cur_y = 0; // This is temp code that will be removed when scrolling is implemented.
     }
     __st_render_cursor();
 }

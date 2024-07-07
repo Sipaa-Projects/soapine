@@ -19,3 +19,4 @@ void *firmware_malloc(int size);
 void firmware_free(void *ptr);
 
 void firmware_reboot_system();
+void firmware_shutdown_system();

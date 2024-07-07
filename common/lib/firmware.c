@@ -18,6 +18,7 @@ int firmware_console_getchar()
 {
     UINTN EventIndex;
     EFI_INPUT_KEY Key;
+    int cr_passed = 0;
 
     while (TRUE) {
         status = uefi_call_wrapper(gST->ConIn->ReadKeyStroke, 2, gST->ConIn, &Key);
@@ -49,8 +50,15 @@ int firmware_console_getchar()
                 return GETCHAR_PGDOWN;
         }
 
-        if (Key.UnicodeChar == CHAR_CARRIAGE_RETURN)
+        if (Key.UnicodeChar == CHAR_CARRIAGE_RETURN) {
             return GETCHAR_ENTER;
+        }
+
+        if (Key.UnicodeChar == CHAR_BACKSPACE)
+            return GETCHAR_BACKSPACE;
+
+        if (Key.UnicodeChar == CHAR_TAB)
+            return GETCHAR_TAB;
 
         if (Key.UnicodeChar == CHAR_NULL && Key.ScanCode == SCAN_ESC) {
             return GETCHAR_ESC;
@@ -82,4 +90,9 @@ void firmware_free(void *ptr)
 void firmware_reboot_system()
 {
     uefi_call_wrapper(RT->ResetSystem, 4, EfiResetCold, status, 0, NULL);
+}
+
+void firmware_shutdown_system()
+{
+    uefi_call_wrapper(RT->ResetSystem, 4, EfiResetShutdown, status, 0, NULL);
 }
