@@ -3,6 +3,7 @@
 #include <efi.h>
 #include <efilib.h>
 #include <string.h>
+#include <stdio.h>
 
 // NOTE: When using GNU-EFI, it is IMPORTANT to use 'uefi_call_wrapper', as you may encounter problems without using it.
 
@@ -13,19 +14,52 @@ unsigned long long firmware_get_last_error()
     return status;
 }
 
-char firmware_console_getchar()
+int firmware_console_getchar()
 {
     UINTN EventIndex;
     EFI_INPUT_KEY Key;
-    uefi_call_wrapper(gBS->WaitForEvent, 3, 1, &gST->ConIn->WaitForKey, &EventIndex);
-    uefi_call_wrapper(gST->ConIn->ReadKeyStroke, 2, gST->ConIn, &Key);
 
-    wchar_t cs = Key.UnicodeChar;
-    char cs2;
+    while (TRUE) {
+        status = uefi_call_wrapper(gST->ConIn->ReadKeyStroke, 2, gST->ConIn, &Key);
+        
+        if (EFI_ERROR(status)) {
+            continue;
+        }
 
-    wctomb(&cs2, cs);
+        switch (Key.ScanCode) {
+            case SCAN_UP:
+                return GETCHAR_CURSOR_UP;
+            case SCAN_DOWN:
+                return GETCHAR_CURSOR_DOWN;
+            case SCAN_RIGHT:
+                return GETCHAR_CURSOR_RIGHT;
+            case SCAN_LEFT:
+                return GETCHAR_CURSOR_LEFT;
+            case SCAN_F10:
+                return GETCHAR_F10;
+            case SCAN_DELETE:
+                return GETCHAR_DELETE;
+            case SCAN_END:
+                return GETCHAR_END;
+            case SCAN_HOME:
+                return GETCHAR_HOME;
+            case SCAN_PAGE_UP:
+                return GETCHAR_PGUP;
+            case SCAN_PAGE_DOWN:
+                return GETCHAR_PGDOWN;
+        }
 
-    return cs2;
+        if (Key.UnicodeChar == CHAR_NULL && Key.ScanCode == SCAN_ESC) {
+            return GETCHAR_ESC;
+        }
+
+        char cs2;
+
+        wctomb(&cs2, Key.UnicodeChar);
+
+        return cs2;
+    }
+
 }
 
 void *firmware_malloc(int size)

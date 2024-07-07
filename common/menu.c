@@ -1,4 +1,5 @@
 #include <drv/fb.h>
+#include <lib/config.h>
 #include <lib/term.h>
 #include <bootloader-info.h>
 #include <menu.h>
@@ -14,6 +15,21 @@
 #define KEY_R 123 
 #define KEY_G 82 
 #define KEY_B 255
+
+#define ENTRY_R 0 
+#define ENTRY_G 255 
+#define ENTRY_B 255
+
+#define ENTRY_FG_R 0 
+#define ENTRY_FG_G 157 
+#define ENTRY_FG_B 255
+
+#define ENTRY_BG_R 0 
+#define ENTRY_BG_G 105 
+#define ENTRY_BG_B 143
+
+menu_entry_t *mentry_selected;
+int mentry_count = 0;
 
 void render_headerbar() {
     framebuffer_t *fb = fb_get();
@@ -56,17 +72,62 @@ void render_headerbar() {
     printf(": Console\n");
 }
 
+void render_entries(int selected_entry) {
+    menu_entry_t *centry = config_get_menu_root();
+    int i = 0;
+
+    while (centry) {
+        term_set_cursor(false, 4, HEADERBAR_HEIGHT + 2 + i);
+        
+        if (selected_entry == i)
+        {
+            term_set_color(true, ENTRY_FG_R, ENTRY_FG_G, ENTRY_FG_B);
+            term_set_color(false, ENTRY_BG_R, ENTRY_BG_G, ENTRY_BG_B);
+        }
+
+        printf("-> %s", centry->name);
+
+        term_reset_color(ALL);
+
+        i++;
+        centry = centry->next;
+    }
+}
+
 __attribute__((noreturn)) void menu(bool first_run)
 {
-render:
+    mentry_count = config_get_mentry_count();
+    int selected_entry = 0;
+
     term_clear();
     render_headerbar();
 
-    term_set_cursor(true, 2, 2 + HEADERBAR_HEIGHT);
+render:
+    render_entries(selected_entry);
+    
     while (1)
     { 
-        char c = getchar();
-        
-        printf("%c", c);
+        int c = getchar();
+        //printf("%d", c);
+        //printf("| Char: %c, Code: %d | ", c, c);
+        switch ((int)c)
+        {
+            case GETCHAR_CURSOR_UP:
+                if (selected_entry == 0)
+                {
+                    selected_entry = mentry_count - 1;
+                    goto render;
+                }
+                selected_entry--;
+                goto render;
+            case GETCHAR_CURSOR_DOWN:
+                if (selected_entry ==  mentry_count - 1)
+                {
+                    selected_entry = 0;
+                    goto render;
+                }
+                selected_entry++;
+                goto render;
+        }
     }
 }

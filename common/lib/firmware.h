@@ -5,7 +5,7 @@
 
 unsigned long long firmware_get_last_error();
 
-char firmware_console_getchar();
+int  firmware_console_getchar();
 void firmware_console_print(char *text);
 void firmware_console_set_cursor(bool visible, int x, int y);
 void firmware_console_clear();
