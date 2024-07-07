@@ -1,3 +1,4 @@
+#include <stdlib.h>
 #include <string.h>
 
 int mbtowc (wchar_t * __pwc, const char *s, size_t n)
@@ -106,4 +107,69 @@ char *strncpy(char *dest, const char *src, size_t n) {
     }
 
     return dest;
+}
+
+char *strcpy(char *dest, const char *src) {
+    char *original_dest = dest;
+
+    while ((*dest++ = *src++) != '\0') { }
+
+    return original_dest;
+}
+
+#include <stddef.h>
+
+char *strtok(char *str, const char *delim) {
+    static char *next;
+    if (str) {
+        next = str;
+    }
+
+    if (!next || *next == '\0') {
+        return NULL;
+    }
+
+    // Skip leading delimiters
+    char *start = next;
+    while (*start && strchr(delim, *start)) {
+        start++;
+    }
+
+    if (*start == '\0') {
+        next = NULL;
+        return NULL;
+    }
+
+    // Find the end of the token
+    char *end = start;
+    while (*end && !strchr(delim, *end)) {
+        end++;
+    }
+
+    if (*end == '\0') {
+        next = end;
+    } else {
+        *end = '\0';
+        next = end + 1;
+    }
+
+    return start;
+}
+
+char *strchr(const char *str, int c) {
+    while (*str) {
+        if (*str == c) {
+            return (char *)str;
+        }
+        str++;
+    }
+    return NULL;
+}
+
+char *strdup(char *str)
+{
+    int size = strlen(str);
+    char *newstr = malloc(size);
+    strncpy(newstr, str, size);
+    return newstr;
 }

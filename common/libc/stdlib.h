@@ -6,3 +6,4 @@
 void abort(bool allow_menu, char *msg, ...);
 void *malloc(size_t size);
 void free(void *ptr);
+int atoi(char *str);

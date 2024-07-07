@@ -14,6 +14,21 @@
         "firmware.h": "c",
         "any": "c",
         "string.h": "c",
-        "jsmn.h": "c"
+        "jsmn.h": "c",
+        "jsmnex.h": "c",
+        "config.h": "c",
+        "fileio.h": "c",
+        "charconv": "c",
+        "chrono": "c",
+        "optional": "c",
+        "ratio": "c",
+        "system_error": "c",
+        "array": "c",
+        "functional": "c",
+        "tuple": "c",
+        "type_traits": "c",
+        "utility": "c",
+        "text_encoding": "c",
+        "typeinfo": "c"
     }
 }
