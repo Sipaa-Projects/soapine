@@ -30,6 +30,8 @@
         "utility": "c",
         "text_encoding": "c",
         "typeinfo": "c",
-        "stdlib.h": "c"
+        "stdlib.h": "c",
+        "bootloader-info.h": "c",
+        "console.h": "c"
     }
 }

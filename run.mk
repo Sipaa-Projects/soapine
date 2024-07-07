@@ -16,6 +16,16 @@ run-uefi-x86_64: $(BIN).efi ovmf-bin
 	@sudo umount $(BINDIR)/mnt
 	@qemu-system-x86_64 -accel kvm -m 1g -bios ovmf/OVMF-x64.fd -drive file=$(BINDIR)/disk-uefi-x86_64.img
 
+run-uefi-x86_64-bare: $(BIN).efi ovmf-bin
+	@mkdir -p $(BINDIR)/mnt
+	@dd if=/dev/zero of=$(BINDIR)/disk-uefi-x86_64.img bs=1M count=64
+	@mkfs.fat -F 32 $(BINDIR)/disk-uefi-x86_64.img
+	@sudo mount -o loop $(BINDIR)/disk-uefi-x86_64.img $(BINDIR)/mnt
+	@sudo mkdir -p $(BINDIR)/mnt/EFI/BOOT
+	@sudo cp $(BINDIR)/soapine-x86_64.efi $(BINDIR)/mnt/EFI/BOOT/BOOTX64.efi
+	@sudo umount $(BINDIR)/mnt
+	@qemu-system-x86_64 -accel kvm -m 1g -bios ovmf/OVMF-x64.fd -drive file=$(BINDIR)/disk-uefi-x86_64.img
+
 debug-uefi-x86_64: $(BIN).efi ovmf-bin
 	@mkdir -p $(BINDIR)/mnt
 	@dd if=/dev/zero of=$(BINDIR)/disk-uefi-x86_64.img bs=1M count=64

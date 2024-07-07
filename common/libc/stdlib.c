@@ -51,3 +51,11 @@ int atoi(char *p) {
      }
      return k;
 }
+
+void usleep(int us) {
+    firmware_usleep(us);
+}
+
+void sleep(int s) {
+    firmware_sleep(s);
+}

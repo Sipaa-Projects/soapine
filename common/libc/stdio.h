@@ -13,6 +13,7 @@
 #define GETCHAR_PGUP 264
 #define GETCHAR_PGDOWN 265
 #define GETCHAR_ESC 266
+#define GETCHAR_ENTER 267
 
 void printf(char *format, ...);
 void vsnprintf(char *buf, int bufsz, char *format, va_list args);

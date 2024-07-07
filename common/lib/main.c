@@ -4,6 +4,7 @@
 #include <lib/config.h>
 #include <lib/term.h>
 #include <libc/fileio.h>
+#include <console.h>
 #include <menu.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -17,23 +18,24 @@ void config_initialize() {
         && (file = open(NULL, "\\EFI\\soapine.cfg")) == NULL
         && (file = open(NULL, "\\EFI\\BOOT\\soapine.cfg")) == NULL
         && (file = open(NULL, "\\soapine\\soapine.cfg")) == NULL){
-        abort(false, "No configuration file found! Please refer to the Soapine documentation.");
+        printf("No configuration file found! Please refer to the Soapine documentation.\n");
+        printf("Dropping to a console...\n\n");
+        
+        console(0);
     } else {
         char buffer[4096];
         read(file, 4096, buffer);
 
         config_init(buffer);
 
-        if (config_parsing_errors_present != 0)
+        if (config_parsing_errors_present != 0 || config_get_menu_root() == NULL)
         {
             printf("\n");
             printf("Configuration parser completed with errors!\n");
             printf("Please take a shot of the messages and correct your config file according to the parser messages.\n\n");
-            printf("System halted\n");
+            printf("Dropping to console...\n");
 
-            asm("cli");
-            while (1)
-                asm("hlt");
+            console(0);
         }
 
         close(file);

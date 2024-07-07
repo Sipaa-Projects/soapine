@@ -49,6 +49,9 @@ int firmware_console_getchar()
                 return GETCHAR_PGDOWN;
         }
 
+        if (Key.UnicodeChar == CHAR_CARRIAGE_RETURN)
+            return GETCHAR_ENTER;
+
         if (Key.UnicodeChar == CHAR_NULL && Key.ScanCode == SCAN_ESC) {
             return GETCHAR_ESC;
         }

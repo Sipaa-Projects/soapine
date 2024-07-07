@@ -74,11 +74,14 @@ void term_init(terminal_type_t preferred)
 void term_set_cursor(bool enabled, int x, int y) {
     if (term_type == FBTERM) {
         ctx.cur_visible = enabled;
-        ctx.cur_x = x;
-        ctx.cur_y = y;
+        if (x >= 0)
+            ctx.cur_x = x;
+        if (y >= 0)
+            ctx.cur_y = y;
     } else if (term_type == FALLBACK) {
         uefi_call_wrapper(gST->ConOut->EnableCursor, 2, gST->ConOut, enabled);
-        uefi_call_wrapper(gST->ConOut->SetCursorPosition, 3, gST->ConOut, x, y);
+        if (x >= 0 && y >= 0)
+            uefi_call_wrapper(gST->ConOut->SetCursorPosition, 3, gST->ConOut, x, y);
     }
 }
 

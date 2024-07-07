@@ -2,6 +2,7 @@
 #include <lib/config.h>
 #include <lib/term.h>
 #include <bootloader-info.h>
+#include <console.h>
 #include <menu.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -99,6 +100,7 @@ __attribute__((noreturn)) void menu(bool first_run)
     mentry_count = config_get_mentry_count();
     int selected_entry = 0;
 
+render_full:
     term_clear();
     render_headerbar();
 
@@ -128,6 +130,15 @@ render:
                 }
                 selected_entry++;
                 goto render;
+            case GETCHAR_CURSOR_RIGHT:
+            case GETCHAR_ENTER:
+            case ' ':
+                abort(true, "Booting isn't supported\n");
+                break;
+            case 'C':
+            case 'c':
+                console(1);
+                goto render_full;
         }
     }
 }
