@@ -15,5 +15,4 @@ Soapine uses all the third-party software/libraries/fonts mentioned below:
 
 * NanoPrintF (by Charles Nicholson): A small, fast & header-only printf implementation.
 * Simpterm (modified): The terminal that powers the lib/term FBTERM backend.
-* JSMN: Soapine relies on JSMN to parse it's config file.
 * The ZAP Group: Linux-like console fonts, used in Soapine
