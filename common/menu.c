@@ -20,13 +20,13 @@
 #define ENTRY_G 255 
 #define ENTRY_B 255
 
-#define ENTRY_FG_R 0 
+#define ENTRY_FG_R 255
 #define ENTRY_FG_G 157 
-#define ENTRY_FG_B 255
+#define ENTRY_FG_B 0
 
 #define ENTRY_BG_R 0 
-#define ENTRY_BG_G 105 
-#define ENTRY_BG_B 143
+#define ENTRY_BG_G 0 
+#define ENTRY_BG_B 0
 
 menu_entry_t *mentry_selected;
 int mentry_count = 0;
@@ -78,14 +78,14 @@ void render_entries(int selected_entry) {
 
     while (centry) {
         term_set_cursor(false, 4, HEADERBAR_HEIGHT + 2 + i);
-        
         if (selected_entry == i)
         {
             term_set_color(true, ENTRY_FG_R, ENTRY_FG_G, ENTRY_FG_B);
             term_set_color(false, ENTRY_BG_R, ENTRY_BG_G, ENTRY_BG_B);
+            printf("> %s <", centry->name);
+        } else {
+            printf("  %s  ", centry->name);
         }
-
-        printf("-> %s", centry->name);
 
         term_reset_color(ALL);
 
