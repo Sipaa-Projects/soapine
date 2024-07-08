@@ -6,7 +6,6 @@
 #include <menu.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <fileio.h>
 
 #define HEADERBAR_HEIGHT 3
 #define BRANDING_R 82 

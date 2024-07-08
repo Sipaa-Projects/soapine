@@ -1,8 +1,11 @@
 #pragma once
 
+#include <efi.h>
+#include <efilib.h>
 #include <lib/term.h>
 #include <stdbool.h>
 
+EFI_STATUS firmware_init();
 unsigned long long firmware_get_last_error();
 
 int  firmware_console_getchar();
@@ -16,7 +19,13 @@ void firmware_usleep(int usec);
 void firmware_sleep(int sec);
 
 void *firmware_malloc(int size);
-void firmware_free(void *ptr);
+void  firmware_free(void *ptr);
 
 void firmware_reboot_system();
 void firmware_shutdown_system();
+
+EFI_FILE*  firmware_open(EFI_FILE* directory, char* path);
+EFI_STATUS firmware_close(EFI_FILE* file);
+int        firmware_get_size(EFI_FILE* file);
+EFI_STATUS firmware_read(EFI_FILE* file, int size, void* buffer);
+EFI_STATUS firmware_write(EFI_FILE* file, int size, void* buffer);
