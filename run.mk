@@ -14,7 +14,7 @@ run-uefi-x86_64: $(BIN).efi ovmf-bin
 	@sudo cp $(BINDIR)/soapine-x86_64.efi $(BINDIR)/mnt/EFI/BOOT/BOOTX64.efi
 	@sudo cp test/soapine.cfg $(BINDIR)/mnt
 	@sudo umount $(BINDIR)/mnt
-	@qemu-system-x86_64 -accel kvm -m 1g -bios ovmf/OVMF-x64.fd -drive file=$(BINDIR)/disk-uefi-x86_64.img
+	@qemu-system-x86_64 -accel kvm -m 1g -bios ovmf/OVMF-x64.fd -drive file=$(BINDIR)/disk-uefi-x86_64.img -usb -device usb-tablet
 
 run-uefi-x86_64-bare: $(BIN).efi ovmf-bin
 	@mkdir -p $(BINDIR)/mnt
@@ -35,7 +35,7 @@ debug-uefi-x86_64: $(BIN).efi ovmf-bin
 	@sudo cp $(BINDIR)/soapine-x86_64.efi $(BINDIR)/mnt/EFI/BOOT/BOOTX64.efi
 	@sudo cp test/soapine.cfg $(BINDIR)/mnt
 	@sudo umount $(BINDIR)/mnt
-	@qemu-system-x86_64 -m 1g -bios ovmf/OVMF-x64.fd -drive file=$(BINDIR)/disk-uefi-x86_64.img -d int,guest_errors --no-reboot --no-shutdown
+	@qemu-system-x86_64 -m 1g -bios ovmf/OVMF-x64.fd -drive file=$(BINDIR)/disk-uefi-x86_64.img -d int,guest_errors --no-reboot --no-shutdown -usb -device usb-tablet
 
 debug-gdb-uefi-x86_64: $(BIN).efi ovmf-bin
 	@mkdir -p $(BINDIR)/mnt
@@ -46,4 +46,4 @@ debug-gdb-uefi-x86_64: $(BIN).efi ovmf-bin
 	@sudo cp $(BINDIR)/soapine-x86_64.efi $(BINDIR)/mnt/EFI/BOOT/BOOTX64.efi
 	@sudo cp test/soapine.cfg $(BINDIR)/mnt
 	@sudo umount $(BINDIR)/mnt
-	@qemu-system-x86_64 -accel kvm -m 1g -bios ovmf/OVMF-x64.fd -drive file=$(BINDIR)/disk-uefi-x86_64.img --no-reboot --no-shutdown -S -s
+	@qemu-system-x86_64 -accel kvm -m 1g -bios ovmf/OVMF-x64.fd -drive file=$(BINDIR)/disk-uefi-x86_64.img --no-reboot --no-shutdown -S -s -usb -device usb-tablet

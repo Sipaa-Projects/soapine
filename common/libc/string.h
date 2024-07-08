@@ -16,5 +16,6 @@ char *strtok(char *str, const char *delim);
 char *strchr(const char *str, int c);
 char *strdup(char *str);
 void _memset(void *ptr, int v, size_t s);
+long strtol(const char *str, char **endptr, int base) ;
 
 #define memset(ptr, v, s) _memset(ptr, v, s);

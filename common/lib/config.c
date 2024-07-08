@@ -19,14 +19,14 @@ char config_entry_property_name[2048];
 
 /*------------ Public API ------------*/
 
-char *config_get_value(char *name) {
+config_declaration_t *config_get_value(char *name) {
     for (int i = 0; i < config_declarations_array_pos; i++)
     {
         if (strlen(name) == strlen(config_declarations[i].name) && strcmp(name, config_declarations[i].name) == 0)
-            return config_declarations[i].value;
+            return &config_declarations[i];
     }
-
-    return CONFIG_NOT_FOUND;
+    
+    return (config_declaration_t *)CONFIG_NOT_FOUND;
 }
 
 menu_entry_t *config_get_menu_root() { return menu_root; }
@@ -89,6 +89,69 @@ void config_remove_spaces_tabs(char *str) {
     *dst = '\0'; // Null-terminate the destination string
 }
 
+bool isdigit(unsigned char c) {
+    if (c == '1' || c == '2' || c == '3' || c == '4' || c == '5' || c == '6' || c == '7' || c == '8' || c == '9' || c == '0')
+        return true;
+    return false;
+}
+
+bool ishexchar(unsigned char c) {
+    if (c == 'A' || c == 'B' || c == 'C' || c == 'D' || c == 'E' || c == 'F')
+        return true;
+    return false;
+}
+
+bool is_decimal_only(const char *str) {
+    while (*str) {
+        if (!isdigit((unsigned char)*str)) {
+            return false;
+        }
+        str++;
+    }
+    return true;
+}
+
+bool is_hex_only(const char *str) {
+    while (*str) {
+        if (!isdigit((unsigned char)*str)) {
+            if (!ishexchar((unsigned char)*str))
+                return false;
+        }
+        str++;
+    }
+    return true;
+}
+
+config_valtype_t config_get_value_type(char *vstring)
+{
+    // Check if there's quotes
+    if (vstring[0] == '\"')
+    {
+        if (vstring[strlen(vstring) - 1] == '\"')
+            return STRING;
+
+        printf("config: Expected an ending quote, but got %s", vstring);
+        config_parsing_errors_present = true;
+        return INVALID;
+    }
+    else if (is_decimal_only(vstring))
+    {
+        return DECIMAL;
+    }
+    else if (is_hex_only(vstring))
+    {
+        return HEXADECIMAL;
+    }
+    else if (vstring[0] == '#' && is_hex_only(&vstring[1]))
+    {
+        return HEX_COLOR;
+    }
+    else if (!strncmp(vstring, "true", 4) || !strncmp(vstring, "false", 5))
+    {
+        return BOOL;
+    }
+}
+
 /*------------ Main config file parsing ------------*/
 
 void config_parse_entry_token(char *tok)
@@ -106,6 +169,16 @@ void config_parse_entry_token(char *tok)
                 return;
             }
             strcpy(parser_mentry->protocol, config_extract_text_in_quotes(tok));
+        }
+        if (!strncmp(config_entry_property_name, "COMMENT", 8))
+        {
+            if (tok[0] != '\"')
+            {
+                printf("config: Expected a string literal in %s->%s, but got: %s\n", parser_mentry->name, config_entry_property_name, tok);
+                config_parsing_errors_present = true;
+                return;
+            }
+            strcpy(parser_mentry->comment, config_extract_text_in_quotes(tok));
         }
         if (!strncmp(config_entry_property_name, "RESOLUTION", 10))
         {
@@ -156,6 +229,7 @@ void config_process_token(char *tok/*, int line */)
         parser_mentry = malloc(sizeof(menu_entry_t));
         strcpy(parser_mentry->name, config_extract_text_in_quotes(tok));
         strcpy(parser_mentry->protocol, "\0");
+        strcpy(parser_mentry->comment, "\0");
         strcpy(parser_mentry->resolution, "\0");
         strcpy(parser_mentry->image_path, "\0");
         strcpy(parser_mentry->cmdline, "\0");
@@ -227,7 +301,54 @@ void config_process_token(char *tok/*, int line */)
             if (config_is_in_entry)
                 config_parse_entry_token(tok);
             else {
-                strcpy(config_declarations[config_declarations_array_pos].value, tok);
+                config_declarations[config_declarations_array_pos].type = config_get_value_type(tok);
+
+                switch (config_declarations[config_declarations_array_pos].type)
+                {
+                case STRING:
+                    config_declarations[config_declarations_array_pos].value_str = config_extract_text_in_quotes(tok); // This functions creates a new buffer using malloc.
+                    break;
+                
+                case DECIMAL:
+                    uint32_t i = (uint32_t)atoi(tok);
+                    config_declarations[config_declarations_array_pos].value = i;
+                    break;
+
+                case HEXADECIMAL:
+                    uint32_t i2 = (uint32_t)strtol(tok, NULL, 16);
+                    config_declarations[config_declarations_array_pos].value = i2;
+                    break;
+
+                case HEX_COLOR:
+                    uint32_t i3 = (uint32_t)strtol(&tok[1], NULL, 16);
+                    config_declarations[config_declarations_array_pos].value = i3;
+                    break;
+
+                case BOOL:
+                    if (!strncmp(tok, "true", 4))
+                    {
+                        config_declarations[config_declarations_array_pos].value = 1;
+                        break;
+                    } else if (!strncmp(tok, "false", 5))
+                    {
+                        config_declarations[config_declarations_array_pos].value = 0;
+                        break;
+                    } else
+                    {
+                        printf("config: Invalid boolean: %s", tok);
+                        config_parsing_errors_present = true;
+                        config_declarations[config_declarations_array_pos].value = -1;
+                        break;
+                    }
+                    config_declarations[config_declarations_array_pos].value = -2;
+                    break;
+
+                default:
+                    printf("config: Unknown type for %s", tok);
+                    config_declarations[config_declarations_array_pos].value = -1;
+                    break;
+                }
+
                 config_declarations_array_pos++;
             }
             config_is_in_declaration = false;
@@ -244,7 +365,19 @@ void config_display() {
     printf("Declarations: \n");
     for (int i = 0; i < config_declarations_array_pos; i++)
     {
-        printf("- Name: %s, Value: %s\n", config_declarations[i].name, config_declarations[i].value);
+        if (config_declarations[i].type == STRING) {
+            printf("- Name: %s, Type: String, Value: %s\n", config_declarations[i].name, config_declarations[i].value_str);
+        } else if (config_declarations[i].type == DECIMAL) {
+            printf("- Name: %s, Type: Decimal, Value: %d\n", config_declarations[i].name, config_declarations[i].value);
+        } else if (config_declarations[i].type == HEXADECIMAL) {
+            printf("- Name: %s, Type: Hexadecimal, Value: %x\n", config_declarations[i].name, config_declarations[i].value);
+        } else if (config_declarations[i].type == HEX_COLOR) {
+            printf("- Name: %s, Type: Hexadecimal RGB color, Value: %x\n", config_declarations[i].name, config_declarations[i].value);
+        } else if (config_declarations[i].type == BOOL) {
+            printf("- Name: %s, Type: Boolean, Value: %s (%d)\n", config_declarations[i].name, config_declarations[i].value == 1 ? "true" : "false", config_declarations[i].value);
+        } else {
+            printf("- Name: %s, Type: Unknown, Value: (null)\n", config_declarations[i].name);
+        }
     }
     printf("\n");
 
@@ -256,6 +389,9 @@ void config_display() {
         printf("   * Protocol: %s\n", curentry->protocol);
         printf("   * Image path: %s\n", curentry->image_path);
 
+        if (strcmp(curentry->resolution, "\0") != 0) {
+            printf("   * Comment: %s\n", curentry->comment);
+        } else { printf("   * Comment: (not provided)\n"); }
         if (strcmp(curentry->resolution, "\0") != 0) {
             printf("   * Command line: %s\n", curentry->resolution);
         } else { printf("   * Command line: (not provided)\n"); }

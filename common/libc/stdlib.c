@@ -3,6 +3,7 @@
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 void abort(bool allow_menu, char *msg, ...) // This isn't exactly POSIX but is needed for the user to know what happened.
 {
@@ -44,12 +45,18 @@ void *malloc(size_t size)
 void free(void *ptr) { firmware_free(ptr); }
 
 int atoi(char *p) {
-    int k = 0;
-    while (*p) {
-        k = (k << 3) + (k << 1) + (*p) - '0';
-        p++;
-     }
-     return k;
+    int result = 0;
+
+    for (int i = 0; i < strlen(p); i++)
+    {
+        if (p[i] >= '0' && p[i] <= '9')
+        {
+            result *= 10;
+            result += (int) (p[i]-'0');
+        }
+    }
+
+    return result;
 }
 
 void usleep(int us) {

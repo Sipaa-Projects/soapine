@@ -117,8 +117,6 @@ char *strcpy(char *dest, const char *src) {
     return original_dest;
 }
 
-#include <stddef.h>
-
 char *strtok(char *str, const char *delim) {
     static char *next;
     if (str) {
@@ -177,4 +175,61 @@ char *strdup(char *str)
 void _memset(void *ptr, int v, size_t s) {
     for (int i = 0; i < s; i++)
         (*(int*)ptr) = v;
+}
+
+long strtol(const char *str, char **endptr, int base) {
+    const char *s = str;
+    long result = 0;
+    int sign = 1;
+    int digit;
+
+    if (*s == '-') {
+        sign = -1;
+        s++;
+    } else if (*s == '+') {
+        s++;
+    }
+
+    if (base == 0) {
+        if (*s == '0') {
+            if (*(s + 1) == 'x' || *(s + 1) == 'X') {
+                base = 16;
+                s += 2;
+            } else {
+                base = 8;
+                s++;
+            }
+        } else {
+            base = 10;
+        }
+    } else if (base == 16) {
+        if (s[0] == '0' && (s[1] == 'x' || s[1] == 'X')) {
+            s += 2;
+        }
+    }
+
+    while (*s) {
+        if (*s >= '0' && *s <= '9') {
+            digit = *s - '0';
+        } else if (*s >= 'a' && *s <= 'f') {
+            digit = *s - 'a' + 10;
+        } else if (*s >= 'A' && *s <= 'F') {
+            digit = *s - 'A' + 10;
+        } else {
+            break;
+        }
+
+        if (digit >= base) {
+            break;
+        }
+
+        result = result * base + digit;
+        s++;
+    }
+
+    if (endptr) {
+        *endptr = (char *)s;
+    }
+
+    return sign * result;
 }

@@ -10,6 +10,7 @@
 #include <stdlib.h>
 #include <stdbool.h>
 
+
 void config_initialize() {
 
     EFI_FILE* file = firmware_open(NULL, "\\soapine.cfg");
@@ -53,7 +54,7 @@ EFI_STATUS EFIAPI efi_main (EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE *SystemTabl
     
     config_initialize();
 
-	menu(true);
+    menu(true);
 
     while (1) ;;
     return EFI_SUCCESS;

@@ -6,6 +6,7 @@
 #include <menu.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #define HEADERBAR_HEIGHT 3
 #define BRANDING_R 82 
@@ -30,9 +31,11 @@
 
 menu_entry_t *mentry_selected;
 int mentry_count = 0;
+framebuffer_t *fb;
+
+char *prefix = ">";
 
 void render_headerbar() {
-    framebuffer_t *fb = fb_get();
 
     term_set_color(false, 16, 16, 16);
     for (int i = 0; i < (fb->width / 8); i++)
@@ -70,6 +73,8 @@ void render_headerbar() {
     term_reset_color(FGONLY);
 
     printf(": Console\n");
+
+    term_reset_color(ALL);
 }
 
 void render_entries(int selected_entry) {
@@ -77,12 +82,23 @@ void render_entries(int selected_entry) {
     int i = 0;
 
     while (centry) {
+        for (int i2 = 0; i2 < (fb->width / 8); i2++)
+        {
+            term_set_cursor(false, i2, HEADERBAR_HEIGHT + 2 + i);
+            term_write(" ");
+        }
+
         term_set_cursor(false, 4, HEADERBAR_HEIGHT + 2 + i);
         if (selected_entry == i)
         {
             term_set_color(true, ENTRY_FG_R, ENTRY_FG_G, ENTRY_FG_B);
             term_set_color(false, ENTRY_BG_R, ENTRY_BG_G, ENTRY_BG_B);
-            printf("> %s <", centry->name);
+
+            if (!strncmp(centry->comment, "\0", 1))
+                printf("%s %s <", prefix, centry->name);
+            else {
+                printf("%s %s (%s) <", prefix, centry->name, centry->comment);
+            }
         } else {
             printf("  %s  ", centry->name);
         }
@@ -98,6 +114,11 @@ __attribute__((noreturn)) void menu(bool first_run)
 {
     mentry_count = config_get_mentry_count();
     int selected_entry = 0;
+    fb = fb_get();
+
+    config_declaration_t *config_prefix = config_get_value("INTERFACE_SELECTED_PREFIX");
+    if (config_prefix != CONFIG_NOT_FOUND && config_prefix->type == STRING)
+        prefix = config_prefix->value_str;
 
 render_full:
     term_clear();

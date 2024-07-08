@@ -316,7 +316,9 @@ void st_write(st_u8 c){
             __st_scroll();
             break;
         case '\b':
+            __st_delete_cursor();
             ctx.cur_x--;
+            __st_render_cursor();
             break;
         case '\r':
             __st_delete_cursor();
