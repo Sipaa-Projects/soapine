@@ -34,6 +34,7 @@ int mentry_count = 0;
 framebuffer_t *fb;
 
 char *prefix = ">";
+char *suffix = "<";
 
 void render_headerbar() {
 
@@ -95,9 +96,9 @@ void render_entries(int selected_entry) {
             term_set_color(false, ENTRY_BG_R, ENTRY_BG_G, ENTRY_BG_B);
 
             if (!strncmp(centry->comment, "\0", 1))
-                printf("%s %s <", prefix, centry->name);
+                printf("%s %s %s", prefix, centry->name, suffix);
             else {
-                printf("%s %s (%s) <", prefix, centry->name, centry->comment);
+                printf("%s %s (%s) %s", prefix, centry->name, centry->comment, suffix);
             }
         } else {
             printf("  %s  ", centry->name);
@@ -120,6 +121,10 @@ __attribute__((noreturn)) void menu(bool first_run)
     if (config_prefix != CONFIG_NOT_FOUND && config_prefix->type == STRING)
         prefix = config_prefix->value_str;
 
+    config_declaration_t *config_suffix = config_get_value("INTERFACE_SELECTED_SUFFIX");
+    if (config_suffix != CONFIG_NOT_FOUND && config_suffix->type == STRING)
+        suffix = config_suffix->value_str;
+    
 render_full:
     term_clear();
     render_headerbar();

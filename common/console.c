@@ -24,8 +24,10 @@ char *readline()
         }
         if (c == GETCHAR_BACKSPACE)
         {
-            printf("\b \b");
-            buf_pos--;
+            if (buf_pos > 0) {
+                printf("\b \b");
+                buf_pos--;
+            }
             continue;
         }
         else if (c == GETCHAR_ENTER)
