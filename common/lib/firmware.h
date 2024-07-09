@@ -1,3 +1,25 @@
+/*
+ * @file common/lib/firmware.h
+ * @brief Firmware-specific functions - header
+ * 
+ * Copyright (C) 2024 Sipaa Projects and the Soapine contributors
+ *
+ * This file is part of the Soapine bootloader
+ * 
+ * Soapine is free software: you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License as published by the Free
+ * Software Foundation, either version 3 of the License, or (at your option)
+ * any later version.
+ *
+ * Soapine is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of  MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+ * more details.
+ *
+ * You should have received a copy of the GNU General Public License along with
+ * Soapine.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 #pragma once
 
 #include <efi.h>
@@ -23,6 +45,8 @@ void  firmware_free(void *ptr);
 
 void firmware_reboot_system();
 void firmware_shutdown_system();
+
+// TODO: It's a war crime to expose the UEFI API in headers.
 
 EFI_FILE*  firmware_open(EFI_FILE* directory, char* path);
 EFI_STATUS firmware_close(EFI_FILE* file);
