@@ -2,22 +2,9 @@
  * @file common/menu.c
  * @brief Menu applet - code
  * 
- * Copyright (C) 2024 Sipaa Projects and the Soapine contributors
+ * Copyright (C) 2024-present Sipaa Projects & the Soapine contributors
  *
- * This file is part of the Soapine bootloader
- * 
- * Soapine is free software: you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the Free
- * Software Foundation, either version 3 of the License, or (at your option)
- * any later version.
- *
- * Soapine is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of  MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
- * more details.
- *
- * You should have received a copy of the GNU General Public License along with
- * Soapine.  If not, see <http://www.gnu.org/licenses/>.
+ * This piece of software is released under the terms of the MIT License
  */
 
 #include <drv/fb.h>
@@ -30,7 +17,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define HEADERBAR_HEIGHT 3
 #define BRANDING_R 82 
 #define BRANDING_G 255 
 #define BRANDING_B 204
@@ -53,21 +39,38 @@
 
 menu_entry_t *mentry_selected;
 int mentry_count = 0;
-framebuffer_t *fb;
+term_dimensions_t td;
 
 char *prefix = ">";
 char *suffix = "<";
 
+int headerbar_height = 3;
+
 void render_headerbar() {
 
-    term_set_color(false, 16, 16, 16);
-    for (int i = 0; i < (fb->width / 8); i++)
-        for (int j = 0; j < HEADERBAR_HEIGHT; j++) {
-            term_set_cursor(false, i, j);
-            term_write(" ");
+    if (term_type == FBTERM)
+    {
+        headerbar_height = 3;
+
+        term_set_color(false, 16, 16, 16);
+        for (int i = 0; i < td.width; i++)
+            for (int j = 0; j < headerbar_height; j++) {
+                term_set_cursor(false, i, j);
+                term_write(" ");
+            }
+
+        term_set_cursor(false, headerbar_height / 2 + 1, headerbar_height / 2);
+    } else {
+        headerbar_height = 2;
+
+        term_set_color(false, 16, 16, 16);
+        for (int i = 0; i < td.width; i++) {
+            term_set_cursor(false, i, 1);
+            term_write("-");
         }
 
-    term_set_cursor(false, HEADERBAR_HEIGHT / 2 + 1, HEADERBAR_HEIGHT / 2);
+        term_set_cursor(false, 0, 0);
+    }
 
     term_set_color(true, BRANDING_R, BRANDING_G, BRANDING_B);
     printf("Soapine %s", SOAPINE_VERSION);
@@ -105,13 +108,13 @@ void render_entries(int selected_entry) {
     int i = 0;
 
     while (centry) {
-        for (int i2 = 0; i2 < (fb->width / 8); i2++)
+        for (int i2 = 0; i2 < td.width; i2++)
         {
-            term_set_cursor(false, i2, HEADERBAR_HEIGHT + 2 + i);
+            term_set_cursor(false, i2, headerbar_height + 2 + i);
             term_write(" ");
         }
 
-        term_set_cursor(false, 4, HEADERBAR_HEIGHT + 2 + i);
+        term_set_cursor(false, 4, headerbar_height + 2 + i);
         if (selected_entry == i)
         {
             term_set_color(true, ENTRY_FG_R, ENTRY_FG_G, ENTRY_FG_B);
@@ -137,7 +140,6 @@ __attribute__((noreturn)) void menu(bool first_run)
 {
     mentry_count = config_get_mentry_count();
     int selected_entry = 0;
-    fb = fb_get();
 
     config_declaration_t *config_prefix = config_get_value("INTERFACE_SELECTED_PREFIX");
     if (config_prefix != CONFIG_NOT_FOUND && config_prefix->type == STRING)
@@ -148,7 +150,10 @@ __attribute__((noreturn)) void menu(bool first_run)
         suffix = config_suffix->value_str;
     
 render_full:
+    td = term_get_dimensions();
+    
     term_clear();
+    term_reset_color(ALL);
     render_headerbar();
 
 render:

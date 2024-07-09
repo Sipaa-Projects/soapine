@@ -2,22 +2,9 @@
  * @file common/console.c
  * @brief Console applet - code
  * 
- * Copyright (C) 2024 Sipaa Projects and the Soapine contributors
+ * Copyright (C) 2024-present Sipaa Projects & the Soapine contributors
  *
- * This file is part of the Soapine bootloader
- * 
- * Soapine is free software: you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the Free
- * Software Foundation, either version 3 of the License, or (at your option)
- * any later version.
- *
- * Soapine is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of  MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
- * more details.
- *
- * You should have received a copy of the GNU General Public License along with
- * Soapine.  If not, see <http://www.gnu.org/licenses/>.
+ * This piece of software is released under the terms of the MIT License
  */
 
 #include <lib/firmware.h>
@@ -93,8 +80,24 @@ void console(int clear_term)
 
         if (strncmp(line, "shutdown", 8) == 0 || strncmp(line, "poweroff", 8) == 0)
             firmware_shutdown_system();
-        if (strncmp(line, "reboot", 6) == 0 || strncmp(line, "poweroff -r", 11) == 0)
+        else if (strncmp(line, "reboot", 6) == 0 || strncmp(line, "poweroff -r", 11) == 0)
             firmware_reboot_system();
+        else if (strncmp(line, "init_fbterm", 11) == 0)
+        {
+            if (term_type == FBTERM)
+            {
+                printf("FBTERM is already your current terminal backend.\n");
+                continue;
+            }
+
+            term_init(FBTERM);
+            term_clear();
+            if (term_type == FBTERM)
+                printf("FBTERM is now your current terminal backend.\n");
+            else
+                printf("We couldn't set FBTERM as your current terminal backend.\n");
+        } else if (strncmp(line, "exit", 4) == 0)
+            break;
         
         free(line);
     }

@@ -2,22 +2,9 @@
  * @file common/lib/term.c
  * @brief Terminal manager - code
  * 
- * Copyright (C) 2024 Sipaa Projects and the Soapine contributors
+ * Copyright (C) 2024-present Sipaa Projects & the Soapine contributors
  *
- * This file is part of the Soapine bootloader
- * 
- * Soapine is free software: you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the Free
- * Software Foundation, either version 3 of the License, or (at your option)
- * any later version.
- *
- * Soapine is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of  MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
- * more details.
- *
- * You should have received a copy of the GNU General Public License along with
- * Soapine.  If not, see <http://www.gnu.org/licenses/>.
+ * This piece of software is released under the terms of the MIT License
  */
 
 #include <drv/fb.h>
@@ -38,6 +25,7 @@
 #define FG_B 255
 
 terminal_type_t term_type;
+framebuffer_t *fb_ptr;
 
 void dummy() {}
 
@@ -45,10 +33,39 @@ extern void __st_clear();
 
 void term_clear() {
     if (term_type == FALLBACK) {
-        gST->ConOut->ClearScreen(gST->ConOut);
+        uefi_call_wrapper(gST->ConOut->ClearScreen, 1, gST->ConOut);
     }
     else if (term_type == FBTERM)
         __st_clear();
+}
+
+term_dimensions_t term_get_dimensions() {
+    if (term_type == FALLBACK)
+    {
+        UINTN Mode = gST->ConOut->Mode->Mode;
+        UINTN Columns;
+        UINTN Rows;
+        EFI_STATUS Status;
+
+        Status = uefi_call_wrapper(gST->ConOut->QueryMode, 4, gST->ConOut, Mode, &Columns, &Rows);
+
+        term_dimensions_t dim;
+        dim.width = (int)Columns;
+        dim.height = (int)Rows;
+
+        return dim;
+    }
+    else if (term_type == FBTERM)
+    {
+        if (!fb_ptr)
+            fb_ptr = fb_get();
+        
+        term_dimensions_t dim;
+        dim.width = fb_ptr->width / ctx.font_width;
+        dim.height = fb_ptr->height / ctx.font_height;
+
+        return dim;
+    }
 }
 
 void term_write(char *str)

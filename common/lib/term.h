@@ -2,22 +2,9 @@
  * @file common/lib/term.h
  * @brief Terminal manager - header
  * 
- * Copyright (C) 2024 Sipaa Projects and the Soapine contributors
+ * Copyright (C) 2024-present Sipaa Projects & the Soapine contributors
  *
- * This file is part of the Soapine bootloader
- * 
- * Soapine is free software: you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the Free
- * Software Foundation, either version 3 of the License, or (at your option)
- * any later version.
- *
- * Soapine is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of  MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
- * more details.
- *
- * You should have received a copy of the GNU General Public License along with
- * Soapine.  If not, see <http://www.gnu.org/licenses/>.
+ * This piece of software is released under the terms of the MIT License
  */
 
 #pragma once
@@ -34,6 +21,11 @@ typedef enum terminal_colorreset_type {
     BGONLY,   // Bg only
     FGONLY,     // Fg only
 } terminal_colorreset_type_t;
+
+typedef struct term_dimensions {
+    int width; // Width (in characters)
+    int height; // Height (in characters)
+} term_dimensions_t;
 
 extern terminal_type_t term_type;
 
@@ -59,5 +51,6 @@ void term_init(terminal_type_t preferred);
 void term_set_cursor(bool enabled, int x, int y);
 void term_set_color(bool is_fg, int r, int g, int b);
 void term_reset_color(terminal_colorreset_type_t t);
+term_dimensions_t term_get_dimensions();
 void term_write(char *str);
 void term_clear();
